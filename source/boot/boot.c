@@ -18,6 +18,7 @@ __asm__(".code16gcc");
  */
 void boot_entry(void) {
     //通过函数指针的方式强制转化该地址并调用该地址完成工程之间的跳转
+    //跳转到loader/start.S
     ((void (*)(void))LOADER_START_ADDR)();
 } 
 
