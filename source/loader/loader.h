@@ -3,6 +3,7 @@
 
 #include "comm/boot_info.h"
 #include "comm/types.h"
+#include "comm/cpu_instr.h"
 
 
 typedef struct SMAP_entry 

@@ -58,11 +58,57 @@ static void detect_memory(void)
     show_msg("ok.\n\r");
 }
 
+uint16_t gdt_table[][4] = {
+    {0, 0, 0, 0},
+    {0xFFFF, 0x0000, 0x9a00, 0x00cf},
+    {0xFFFF, 0x0000, 0x9200, 0x00cf},
+};
+
+/**
+ * 从实模式切换到保护模式，需要遵循一定的流程
+ * 1.禁用中断
+ * 2.打开A20地址线
+ * 3.加载GTD表
+ * 4.设置CR0
+ * 5.远跳转
+ * 6.保护模式
+*/
+static void enter_protect_mode (void)
+{
+    cli();
+
+    //打开A20地址线
+    //in al, 0x92
+    //or al, 2
+    //out 0x92,al
+    uint8_t v = inb(0x92);
+    outb(0x92, v | 0x2);
+
+    //加载gdt表
+    lgdt((uint32_t) gdt_table, sizeof(gdt_table));
+}
+
 //实模式
+//CPU上电复位后默认进入实模式，这种模式下没有保护机制，但提供了bios服务
+/**
+ * 1.只能访问1MB内存，内核寄存器最大为16位宽
+ * 2.所有操作数最大为16位宽
+ * 3.没有任何保护机制
+ * 4.没有特权级支持
+ * 5.没有分页机制和虚拟内存的支持
+**/
+//保护模式
+/**
+ * 寄存器位宽扩展至32位，最大访问可4GB内存
+ * 所有操作数最大为32位宽，出入站也为32位
+ * 提供4种特权级，操作系统可以运行在最高特权级，应用程序可运行在最低特权级
+ * 支持虚拟内存 可开启分页机制
+*/
 void loader_entry (void)
 {
     show_msg("[wjos] - loading os...\n\r");
     detect_memory();
+    enter_protect_mode();
     for(;;)
     {
         
