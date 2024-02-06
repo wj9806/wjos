@@ -2,7 +2,6 @@
 #define __CPU_H__
 
 #include "comm/types.h"
-#include "os_cfg.h"
 
 #pragma pack(1)
 
@@ -16,6 +15,25 @@ typedef struct _segment_desc_t
 } segment_desc_t;
 
 #pragma pack()
+
+#define SEG_G (1 << 15)
+#define SEG_D (1 << 14)
+#define SEG_P_PRESENT (1 << 7)
+//特权级
+#define SEG_DPL_0 (0 << 5)
+#define SEG_DPL_3 (3 << 5)
+
+//系统段
+#define SEG_S_SYSTEM (0 << 4)
+//普通
+#define SEG_S_NORMAL (1 << 4)
+
+//代码段
+#define SEG_TYPE_CODE (1 << 3)
+//数据段
+#define SEG_TYPE_DATA (0 << 3)
+//可读写
+#define SEG_TYPE_RW (1 << 1)
 
 void segment_desc_set (int selector, uint32_t base, uint32_t limit, uint16_t attr);
 

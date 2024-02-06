@@ -8,6 +8,12 @@
 void kernel_init (boot_info_t * boot_info) 
 {
     init_cpu();
-    
-    for (;;) {}
+}
+
+void main_init()
+{
+    for(;;)
+    {
+        
+    }
 }
