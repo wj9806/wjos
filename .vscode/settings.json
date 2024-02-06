@@ -11,6 +11,7 @@
         "_default_fcntl.h": "c",
         "boot_info.h": "c",
         "stdio.h": "c",
-        "loader.h": "c"
+        "loader.h": "c",
+        "init.h": "c"
     },
 }
