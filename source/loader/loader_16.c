@@ -86,6 +86,13 @@ static void enter_protect_mode (void)
 
     //加载gdt表
     lgdt((uint32_t) gdt_table, sizeof(gdt_table));
+
+    //设置CR0 最低位置1
+    uint32_t cr0 = read_cr0();
+    write_cr0(cr0 | (1 << 0));
+
+    //远跳转
+    far_jump(8, (uint32_t) protect_mode_entry);
 }
 
 //实模式
