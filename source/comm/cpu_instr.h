@@ -65,4 +65,13 @@ static inline void far_jump(uint32_t selector, uint32_t offset)
 
 }
 
+//inw指令
+static inline uint16_t inw (uint16_t port)
+{
+    uint16_t rv;
+    //in ax, dx
+    __asm__ __volatile__("in %[p],%[v]":[v]"=a"(rv) : [p]"d"(port));
+    return rv;
+}
+
 #endif
