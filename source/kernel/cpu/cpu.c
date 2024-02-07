@@ -21,6 +21,16 @@ void segment_desc_set (int selector, uint32_t base, uint32_t limit, uint16_t att
     desc->base31_24 = (base >> 24) & 0xFF;
 }
 
+void gate_desc_set (gate_desc_t* desc, uint16_t selector, uint32_t offset, uint16_t attr)
+{
+    //取低16位
+    desc->offset15_0 = offset & 0xFFFF;
+    desc->selector = selector;
+    desc->attr = attr;
+    //取高16位
+    desc->offset31_16 = (offset >> 16) & 0xFFFF;
+}
+
 //初始化gdt表
 void init_gdt()
 {
