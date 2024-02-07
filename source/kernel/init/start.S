@@ -32,3 +32,60 @@ gdt_reload:
 
 	.bss
 .comm stack, KERNEL_STACK_SIZE    
+
+.macro exception_handler name num with_error_code
+    .text
+    .extern do_handle_\name
+    .global exception_handler_\name
+exception_handler_\name:
+    .if \with_error_code == 0
+        push $0
+    .endif
+
+    push $\num
+    # 保存寄存器的值 
+    pusha
+    push %ds
+    push %es
+    push %fs
+    push %gs
+
+    push %esp
+    # 跳转到c文件中的do_handle_\name函数
+    call do_handle_\name
+    # pop %esp
+    add $(1*4), %esp
+
+    # 恢复寄存器的值
+    pop %gs
+    pop %fs
+    pop %es
+    pop %ds
+    popa
+
+    add $(2*4), %esp
+
+    iret
+.endm
+
+exception_handler unknown, -1, 0
+exception_handler divide, 0, 0
+exception_handler Debug, 1, 0
+exception_handler NMI, 2, 0
+exception_handler breakpoint, 3, 0
+exception_handler overflow, 4, 0
+exception_handler bound_range, 5, 0
+exception_handler invalid_opcode, 6, 0
+exception_handler device_unavailable, 7, 0
+exception_handler double_fault, 8, 1
+exception_handler invalid_tss, 10, 1
+exception_handler segment_not_present, 11, 1
+exception_handler stack_segment_fault, 12, 1
+exception_handler general_protection, 13, 1
+exception_handler page_fault, 14, 1
+exception_handler fpu_error, 16, 0
+exception_handler alignment_check, 17, 1
+exception_handler machine_check, 18, 0
+exception_handler smd_exception, 19, 0
+exception_handler virtual_exception, 20, 0
+exception_handler control_exception, 21, 0

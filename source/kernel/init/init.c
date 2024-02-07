@@ -8,13 +8,15 @@
  */
 void kernel_init (boot_info_t * boot_info) 
 {
+    //cpu 初始化
     init_cpu();
+    //添加缺省的异常捕获函数
     irq_init();
 }
 
 void main_init (void)
 {
-    //int a = 3/0;
+    int a = 3/0;
     for(;;)
     {
         

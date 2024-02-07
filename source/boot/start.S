@@ -12,7 +12,7 @@
 	.global _start
 	
 	# 声明函数为外部声明的函数
-	.extern boot_entryc
+	.extern boot_entry
 _start:
 
 	# 首先将段地址寄存器全部设置为0
