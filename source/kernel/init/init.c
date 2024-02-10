@@ -22,7 +22,7 @@ void kernel_init (boot_info_t * boot_info)
 void main_init (void)
 {
     log_printf("wjos-kernel is running....");
-    log_printf("wjos-kernel version: %s", OS_VERSION);
+    log_printf("wjos-kernel version: %s, date: %s", OS_VERSION, OS_TIME);
     //int a = 3/0;
     //irq_enable_global();
     for(;;)
