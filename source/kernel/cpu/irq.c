@@ -2,13 +2,35 @@
 #include "cpu/irq.h"
 #include "cpu/cpu.h"
 #include "os_cfg.h"
+#include "tools/log.h"
 
 #define IDT_TABLE_NR 128
 
 static gate_desc_t idt_table[IDT_TABLE_NR];
 
+static void dump_core_regs (exception_frame_t * frame) {
+    // 打印CPU寄存器相关内容
+    log_printf("IRQ: %d, error code: %d.", frame->num, frame->error_code);
+    log_printf("CS: %d\r\nDS: %d\r\nES: %d\r\nSS: %d\r\nFS:%d\r\nGS:%d",
+               frame->cs, frame->ds, frame->es, frame->ds, frame->fs, frame->gs
+    );
+    log_printf("EAX:0x%x\r\n"
+                "EBX:0x%x\r\n"
+                "ECX:0x%x\r\n"
+                "EDX:0x%x\r\n"
+                "EDI:0x%x\r\n"
+                "ESI:0x%x\r\n"
+                "EBP:0x%x\r\n"
+                "ESP:0x%x\r\n",
+               frame->eax, frame->ebx, frame->ecx, frame->edx,
+               frame->edi, frame->esi, frame->ebp, frame->esp);
+    log_printf("EIP:0x%x\r\nEFLAGS:0x%x\r\n", frame->eip, frame->eflags);
+}
+
 static void do_default_handle(exception_frame_t * frame, const char* msg)
 {
+    log_printf("[ERROR] - IRQ Exception happend: %s ", msg);
+    dump_core_regs(frame);
     for(;;)
     {
         hlt();
