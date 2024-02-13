@@ -22,4 +22,13 @@ void kernel_sprintf(char* str_buf, const char * fmt, ...);
 
 void kernel_vsprintf(char* str_buf, const char * fmt, va_list args);
 
+#ifndef RELEASE
+#define ASSERT(expr) \
+    if (!(expr)) pannic(__FILE__, __LINE__, __func__, #expr);
+    
+void pannic(const char * file, int line, const char * func, const char * cond);
+#else
+#define ASSERT(expr) ((void)0)
+#endif //RELEASE
+
 #endif

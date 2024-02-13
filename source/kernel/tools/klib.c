@@ -1,5 +1,7 @@
 #include "tools/klib.h"
 #include "comm/types.h"
+#include "comm/cpu_instr.h"
+#include "tools/log.h"
 
 
 void kernel_strcpy(char * dest, const char * src)
@@ -204,4 +206,14 @@ void kernel_vsprintf(char* buf, const char * fmt, va_list args)
         }
     }
     
+}
+
+void pannic(const char * file, int line, const char * func, const char * cond)
+{
+    log_printf("assert failed! cond ==> [%s]", cond);
+    log_printf("file: %s, line: %d. func: %s", file, line, func);
+    for(;;)
+    {
+        hlt();
+    }
 }

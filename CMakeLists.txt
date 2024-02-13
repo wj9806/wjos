@@ -17,6 +17,7 @@ endif ()
 
 # C编译器与参数配置
 set(CMAKE_C_COMPILER "${TOOL_PREFIX}gcc") 
+#可以增加编译参数 -DRELEASE
 set(CMAKE_C_FLAGS "-g -c -O0 -m32 -fno-pie -fno-stack-protector -fno-asynchronous-unwind-tables")
 
 # 汇编器与参数配置
