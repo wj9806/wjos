@@ -127,16 +127,33 @@ void kernel_itoa(char * buf, int num, int base)
         *p = '\0';
         return;
     }
+    int signed_num = 0;
     if (num < 0 && base == 10)
     {
         *p++ = '-';
+        signed_num = 1;
     }
-    //数字转字符串
-    do {
-        char ch = num2ch[num % base + 15];
-        *p++ = ch;
-        num /= base;
-    } while(num);
+    //正负进行分开处理。
+    if(signed_num)
+    {
+        //数字转字符串
+        do {
+            char ch = num2ch[num % base + 15];
+            *p++ = ch;
+            num /= base;
+        } while(num);
+    }
+    else
+    {
+        //对于十六进制数，不支持负数，所以需要将其转换成无符号数进行除和求余
+        uint32_t u_num = (uint32_t)num;
+        do {
+            char ch = num2ch[u_num % base + 15];
+            *p++ = ch;
+            u_num /= base;
+        } while (u_num);
+    }
+
     
     *p-- = '\0';
 
