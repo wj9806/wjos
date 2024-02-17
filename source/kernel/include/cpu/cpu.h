@@ -32,7 +32,7 @@ typedef struct _tss_t
     uint32_t pre_link;
     uint32_t esp0, ss0, esp1, ss1, esp2, ss2;
     uint32_t cr3;
-    uint32_t eip, eflags, eax, ecx, edx, ebx, esp, esi, edi;
+    uint32_t eip, eflags, eax, ecx, edx, ebx, esp, ebp, esi, edi;
     uint32_t es, cs, ss, ds, fs, gs;
     uint32_t ldt;
     uint32_t iomap;
@@ -57,6 +57,8 @@ typedef struct _tss_t
 #define SEG_TYPE_CODE      (1 << 3)
 //数据段
 #define SEG_TYPE_DATA      (0 << 3)
+//TSS
+#define SEG_TYPE_TSS       (9 << 0)
 //可读写
 #define SEG_TYPE_RW        (1 << 1)
 
@@ -74,4 +76,7 @@ void init_cpu(void);
 
 void gate_desc_set (gate_desc_t* desc, uint16_t selector, uint32_t offset, uint16_t attr);
 
+int gdt_alloc_desc();
+
+void switch_to_tss(int tss_sel);
 #endif

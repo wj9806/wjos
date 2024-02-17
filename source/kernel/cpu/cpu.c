@@ -51,9 +51,27 @@ void init_gdt()
     lgdt((uint32_t)gdt_table, sizeof(gdt_table));
 }
 
+int gdt_alloc_desc()
+{
+    for (int i = 1; i < GDT_TABLE_SIZE; i++)
+    {
+        segment_desc_t * desc = gdt_table + i;
+        if (desc->attr == 0)
+        {
+            return i * sizeof(segment_desc_t);
+        }
+    }
+    return -1;
+}
+
 //初始化cpu
 //分段采用平坦模型
 void init_cpu(void)
 {
     init_gdt();
+}
+
+void switch_to_tss(int tss_sel)
+{
+    far_jump(tss_sel, 0);
 }

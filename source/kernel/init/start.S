@@ -91,3 +91,25 @@ exception_handler virtual_exception, 20, 0
 exception_handler control_exception, 21, 0
 
 exception_handler time, 0x20, 0
+
+    # simple_switch(&from, to)
+    .text
+    .global simple_switch
+simple_switch:
+    mov 0x4(%esp), %eax
+    # 实现栈的切换
+    mov 0x8(%esp), %edx
+
+    push %ebp
+    push %ebx
+    push %esi
+    push %edi
+    mov %esp, (%eax)
+
+    # 恢复寄存器
+    mov %edx, %esp
+    pop %edi
+    pop %esi
+    pop %ebx
+    pop %ebp
+    ret
