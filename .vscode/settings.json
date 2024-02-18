@@ -18,6 +18,7 @@
         "irq.h": "c",
         "cpu_instr.h": "c",
         "time.h": "c",
-        "klib.h": "c"
+        "klib.h": "c",
+        "list.h": "c"
     },
 }

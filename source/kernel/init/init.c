@@ -5,6 +5,7 @@
 #include "cpu/irq.h"
 #include "dev/time.h"
 #include "tools/log.h"
+#include "tools/list.h"
 #include "tools/klib.h"
 #include "os_cfg.h"
 #include "core/task.h"
@@ -37,8 +38,44 @@ void init_task_entry()
     }
 }
 
+void list_test()
+{
+    list_t list;
+    list_init(&list);   
+    node_t nodes[5];
+    for(int i =0; i< 5; i++)
+    {
+        node_t * node = nodes + i;
+        log_printf("node : 0x%x", node);
+        list_insert_first(&list, node);
+    }
+
+    log_printf("list: first=0x%x, last=0x%x, count=%d", list_first(&list), 
+        list_last(&list), list_count(&list));
+
+    for(int i =0; i< 5; i++)
+    {
+        node_t * node = list_remove_last(&list);
+        log_printf("node : 0x%x", node);
+    }
+
+    log_printf("list: first=0x%x, last=0x%x, count=%d", list_first(&list), 
+        list_last(&list), list_count(&list));
+
+    struct t_t
+    {
+        int i;
+        node_t node;
+    } v = {0x123456};
+    node_t * t_node = &v.node;
+    struct t_t * p = list_node_parent(t_node, struct t_t, node);
+    ASSERT(p->i == 0x123456);
+}
+
 void main_init (void)
 {
+    list_test();
+
     log_printf("wjos-kernel is running....");
     log_printf("wjos-kernel version: %s, date: %s", OS_VERSION, OS_TIME);
     //int a = 3/0;

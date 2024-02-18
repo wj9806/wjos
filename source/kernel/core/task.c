@@ -31,18 +31,18 @@ static int tss_init(task_t * task, uint32_t entry, uint32_t esp)
 int task_init(task_t * task, uint32_t entry, uint32_t esp)
 {
     ASSERT(task != (task_t*)0);
-    //tss_init(task, entry, esp);
-    uint32_t * pesp = (uint32_t*)esp;
-    if (pesp)
-    {
-        *(--pesp) = entry;
-        //设置四个寄存器
-        *(--pesp) = 0;
-        *(--pesp) = 0;
-        *(--pesp) = 0;
-        *(--pesp) = 0;
-        task->stack = pesp;
-    }
+    tss_init(task, entry, esp);
+    // uint32_t * pesp = (uint32_t*)esp;
+    // if (pesp)
+    // {
+    //     *(--pesp) = entry;
+    //     //设置四个寄存器
+    //     *(--pesp) = 0;
+    //     *(--pesp) = 0;
+    //     *(--pesp) = 0;
+    //     *(--pesp) = 0;
+    //     task->stack = pesp;
+    // }
     
     return 0;
 }
@@ -52,6 +52,6 @@ void simple_switch(uint32_t ** from, uint32_t * to);
 //任务切换
 void task_switch_from_to(task_t* from, task_t* to)
 {
-    //switch_to_tss(to->tss_sel);
-    simple_switch(&from->stack, to->stack);
+    switch_to_tss(to->tss_sel);
+    //simple_switch(&from->stack, to->stack);
 }

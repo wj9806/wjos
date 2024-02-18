@@ -7,7 +7,7 @@
 typedef struct _task_t
 {
     //ESP寄存器指针
-    uint32_t * stack;
+    //uint32_t * stack;
     tss_t tss;
     int tss_sel;
 } task_t;
