@@ -34,7 +34,7 @@ void init_task_entry()
     {
         log_printf("task: %d", count++);
         //task_switch_from_to(&init_task, task_first_task());
-        sys_sched_yeild();
+        //sys_sched_yeild();
     }
 }
 
@@ -43,7 +43,7 @@ void main_init (void)
     log_printf("wjos-kernel is running....");
     log_printf("wjos-kernel version: %s, date: %s", OS_VERSION, OS_TIME);
     //int a = 3/0;
-    //irq_enable_global();
+    irq_enable_global();
 
     task_init(&init_task, "init task", (uint32_t)init_task_entry, (uint32_t)&init_task_stack[1024]);
     task_first_init();
@@ -53,6 +53,6 @@ void main_init (void)
     {
         log_printf("main: %d", count++);
         //task_switch_from_to(task_first_task(), &init_task);
-        sys_sched_yeild();
+        //sys_sched_yeild();
     }
 }

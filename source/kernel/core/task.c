@@ -38,6 +38,8 @@ int task_init(task_t * task, const char * name, uint32_t entry, uint32_t esp)
 
     kernel_strncpy(task->name, name, TASK_NAME_SIZE);
     task->state = TASK_CREATED;
+    task->time_ticks = TASK_TIME_SLICE_DEFAULT;
+    task->slice_ticks = task->time_ticks;
     node_init(&task->all_node);
     node_init(&task->run_node);
     
@@ -138,4 +140,18 @@ void task_dispatch(void)
         task_switch_from_to(from, to);
     }
      
+}
+
+//计算任务运行时间片
+void task_time_tick(void)
+{
+    task_t * curr_task = task_current();
+    if (--curr_task->slice_ticks == 0)
+    {
+        curr_task->slice_ticks = curr_task->time_ticks;
+        task_set_block(curr_task);
+        task_set_ready(curr_task);
+        task_dispatch();
+    }
+    
 }

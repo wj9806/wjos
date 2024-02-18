@@ -5,7 +5,11 @@
 #include "cpu/cpu.h"
 #include "tools/list.h"
 
-#define TASK_NAME_SIZE 32
+#define TASK_NAME_SIZE                        32
+//期望每个任务执行100ms放弃时间片
+//因为时钟中断是10ms一次
+//所以10次节拍后放弃时间片
+#define TASK_TIME_SLICE_DEFAULT               (100/10)
 
 typedef struct _task_t
 {
@@ -18,6 +22,9 @@ typedef struct _task_t
         TASK_READY,      //任务就绪
         TASK_WAITTING,   //任务等待
     } state;
+
+    int time_ticks;
+    int slice_ticks;
 
     char name[TASK_NAME_SIZE];
 
@@ -62,5 +69,7 @@ int sys_sched_yeild(void);
 
 //任务分配
 void task_dispatch(void);
+
+void task_time_tick(void);
 
 #endif
