@@ -12,4 +12,6 @@
 //10毫秒产生一次时钟中断
 #define OS_TICKS_MS 10
 
+#define IDLE_TASK_SIZE 1024
+
 #endif
