@@ -2,6 +2,7 @@
 #include "tools/log.h"
 #include "tools/klib.h"
 #include "comm/cpu_instr.h"
+#include "cpu/irq.h"
 
 #define COM1_PORT           0x3F8       // RS232端口0初始化
 
@@ -31,6 +32,9 @@ void log_printf(const char * fmt, ...)
     va_end(args);
 
     const char* p = str_buf;
+
+    irq_state_t state = irq_enter_protection();
+    
     while (*p != '\0')
     {
         while ((inb(COM1_PORT+5) & (1 << 6)) == 0);
@@ -39,4 +43,6 @@ void log_printf(const char * fmt, ...)
     }
     outb(COM1_PORT, '\r');
     outb(COM1_PORT, '\n');
+
+    irq_leave_protection(state);
 }

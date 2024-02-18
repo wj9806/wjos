@@ -260,3 +260,17 @@ void pic_send_eoi(int irq_num)
 
     outb(PIC0_OCW2, PIC_OCW2_EOI);
 }
+
+//进入临界区保护状态
+irq_state_t irq_enter_protection()
+{
+    irq_state_t state = read_eflags();
+    irq_disable_global();
+    return state;
+}
+
+//离开临界区保护状态
+void irq_leave_protection(irq_state_t state)
+{
+    write_eflags(state);
+}

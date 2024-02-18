@@ -5,6 +5,7 @@
 #include "os_cfg.h"
 #include "cpu/cpu.h"
 #include "tools/log.h"
+#include "cpu/irq.h"
 
 static task_manager_t task_manager;
 
@@ -43,8 +44,10 @@ int task_init(task_t * task, const char * name, uint32_t entry, uint32_t esp)
     node_init(&task->all_node);
     node_init(&task->run_node);
     
+    irq_state_t state = irq_enter_protection();
     task_set_ready(task);
     list_insert_last(&task_manager.task_list, &task->all_node);
+    irq_leave_protection(state);
 
     // uint32_t * pesp = (uint32_t*)esp;
     // if (pesp)
@@ -114,6 +117,7 @@ void task_set_block(task_t * task)
 
 int sys_sched_yeild(void)
 {
+    irq_state_t state = irq_enter_protection();
     if (list_count(&task_manager.ready_list) > 1)
     {
         //把当前运行的任务放到就绪队列中
@@ -123,12 +127,14 @@ int sys_sched_yeild(void)
 
         task_dispatch();
     }
+    irq_leave_protection(state);
     return 0;
 }
 
 //分派任务
 void task_dispatch(void)
 {
+    irq_state_t state = irq_enter_protection();
     task_t * to = task_next_run();
     if (to != task_manager.curr_task)
     {
@@ -139,7 +145,7 @@ void task_dispatch(void)
         //切换到to去运行
         task_switch_from_to(from, to);
     }
-     
+    irq_leave_protection(state);
 }
 
 //计算任务运行时间片
