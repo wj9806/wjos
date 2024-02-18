@@ -9,11 +9,6 @@ sudo apt-get install cmake -y
 ```shell
 sudo apt-get install qemu-system-x86 -y
 ```
-安装vscode：https://code.visualstudio.com，点击下载deb包
-```shell
-#执行安装命令
-sudo dpkg -i code_安装包名.deb
-```
 配置sudo:
 ```shell
 sudo vi /etc/sudoers
@@ -21,3 +16,12 @@ sudo vi /etc/sudoers
 #文件中添加一行,username为你当前系统登陆用户名
 username ALL=(ALL) NOPASSWD: /usr/bin/mount, /usr/bin/umount, /usr/bin/cp
 ```
+
+安装vscode：https://code.visualstudio.com，点击下载deb包
+```shell
+#执行安装命令
+sudo dpkg -i code_安装包名.deb
+```
+vscode安装完成后，安装c/c++插件，点击build构建，然后点击run and debug调试。
+![image](https://github.com/wj9806/wjos/assets/42533631/ad944557-ac7f-40b0-8199-aa529be88dff)
+
