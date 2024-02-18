@@ -1,4 +1,4 @@
-![image](https://github.com/wj9806/wjos/assets/42533631/540d2e11-5aae-4f0c-8bf7-af8b7f43f12c)## ubuntu 环境搭建
+## ubuntu 环境搭建
 安装GCC编译器和CMake：
 ```shell
 sudo apt-get install gcc-i686-linux-gnu -y
