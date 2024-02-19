@@ -19,6 +19,7 @@
         "cpu_instr.h": "c",
         "time.h": "c",
         "klib.h": "c",
-        "list.h": "c"
+        "list.h": "c",
+        "mutex.h": "c"
     },
 }

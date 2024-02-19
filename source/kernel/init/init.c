@@ -8,6 +8,7 @@
 #include "tools/klib.h"
 #include "os_cfg.h"
 #include "core/task.h"
+#include "ipc/sem.h"
 
 /**
  * 内核入口
@@ -26,14 +27,16 @@ void kernel_init (boot_info_t * boot_info)
 
 static uint32_t init_task_stack[1024];
 static task_t init_task;
+static sem_t sem;
 
 void init_task_entry()
 {
     int count = 0;
     for(;;)
     {
+        //sem_wait(&sem);
         log_printf("task: %d", count++);
-        sys_sleep(500);
+        //sys_sleep(500);
         //task_switch_from_to(&init_task, task_first_task());
         //sys_sched_yeild();
     }
@@ -48,13 +51,15 @@ void main_init (void)
 
     task_init(&init_task, "init task", (uint32_t)init_task_entry, (uint32_t)&init_task_stack[1024]);
     task_first_init();
-    
+
+    sem_init(&sem, 0);
     irq_enable_global();
     int count = 0;
     for(;;)
     {
         log_printf("main: %d", count++);
-        sys_sleep(1000);
+        //sem_notify(&sem);
+        //sys_sleep(1000);
         //task_switch_from_to(task_first_task(), &init_task);
         //sys_sched_yeild();
     }

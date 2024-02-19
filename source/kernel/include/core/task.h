@@ -30,6 +30,7 @@ typedef struct _task_t
     char name[TASK_NAME_SIZE];
 
     node_t run_node;
+    node_t wait_node;
     node_t all_node;
 
     tss_t tss;

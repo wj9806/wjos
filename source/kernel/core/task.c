@@ -45,6 +45,7 @@ int task_init(task_t * task, const char * name, uint32_t entry, uint32_t esp)
     task->slice_ticks = task->time_ticks;
     node_init(&task->all_node);
     node_init(&task->run_node);
+    node_init(&task->wait_node);
     
     irq_state_t state = irq_enter_protection();
     task_set_ready(task);
@@ -82,14 +83,13 @@ static void idle_task_entry(void)
 
 void task_manager_init(void)
 {
+    task_manager.curr_task = (task_t *) 0;
     list_init(&task_manager.ready_list);
     list_init(&task_manager.task_list);
     list_init(&task_manager.sleep_list);
 
     task_init(&task_manager.idle_task, "idle-task", 
         (uint32_t)idle_task_entry, (uint32_t) (idle_task_stack + IDLE_TASK_SIZE));
-
-    task_manager.curr_task = (task_t *) 0;
 }
 
 void task_first_init(void)
