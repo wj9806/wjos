@@ -14,7 +14,7 @@ int kernel_strlen(const char * str);
 
 void kernel_memcpy(void * dest, void * src, int size);
 
-void kernel_memset(void * dest, uint8_t * src, int size);
+void kernel_memset(void * dest, uint8_t src, int size);
 
 int kernel_memcmp(void * d1, void * d2, int size);
 

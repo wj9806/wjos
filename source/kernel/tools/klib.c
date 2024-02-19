@@ -78,7 +78,7 @@ void kernel_memcpy(void * dest, void * src, int size)
     }
 }
 
-void kernel_memset(void * dest, uint8_t * v, int size)
+void kernel_memset(void * dest, uint8_t v, int size)
 {
     if (!dest || !size) {
         return;
