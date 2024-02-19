@@ -4,6 +4,19 @@
 #include "comm/types.h"
 #include<stdarg.h>
 
+//向下取size的bound整数倍
+static inline uint32_t down2(uint32_t size, uint32_t bound)
+{
+    return size & ~(bound -1);
+}
+
+//向上取size的bound整数倍
+static inline uint32_t up2(uint32_t size, uint32_t bound)
+{
+    return (size + bound - 1) & ~(bound -1);
+}
+
+
 void kernel_strcpy(char * dest, const char * src);
 
 void kernel_strncpy(char * dest, const char * src, int size);

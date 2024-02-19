@@ -20,6 +20,8 @@
         "time.h": "c",
         "klib.h": "c",
         "list.h": "c",
-        "mutex.h": "c"
+        "mutex.h": "c",
+        "memory.h": "c",
+        "stdarg.h": "c"
     },
 }

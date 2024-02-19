@@ -72,7 +72,7 @@ int gdt_alloc_desc()
 
 //初始化cpu
 //分段采用平坦模型
-void init_cpu(void)
+void cpu_init(void)
 {
     mutex_init(&mutex);
     init_gdt();

@@ -8,6 +8,7 @@
 #include "tools/klib.h"
 #include "os_cfg.h"
 #include "core/task.h"
+#include "core/memory.h"
 #include "ipc/sem.h"
 
 /**
@@ -17,7 +18,8 @@ void kernel_init (boot_info_t * boot_info)
 {
     ASSERT(boot_info->ram_region_count != 0);
     //cpu 初始化
-    init_cpu();
+    cpu_init();
+    memory_init(boot_info);
     log_init();
     //添加缺省的异常捕获函数
     irq_init();
