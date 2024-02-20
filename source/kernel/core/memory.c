@@ -20,6 +20,8 @@
  *  0x100000 
  * 
 */
+
+//位图缓存
 static addr_alloc_t paddr_alloc;
 
 static void addr_alloc_init(addr_alloc_t * addr_alloc, uint8_t * bits, 

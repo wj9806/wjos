@@ -59,7 +59,6 @@ static inline void lidt (uint32_t start, uint32_t size)
     __asm__ __volatile__("lidt %[g]"::[g]"m"(idt));
 }
 
-
 static inline uint32_t read_cr0(void)
 {
     uint32_t cr0;
@@ -71,6 +70,30 @@ static inline uint32_t read_cr0(void)
 static inline void write_cr0(uint32_t v)
 {
     __asm__ __volatile__("mov %[v], %%cr0"::[v]"r"(v));
+}
+
+static inline uint32_t read_cr3(void)
+{
+    uint32_t cr3;
+    __asm__ __volatile__("mov %%cr3, %[v]":[v]"=r"(cr3));
+    return cr3;
+}
+
+static inline void write_cr3(uint32_t v)
+{
+    __asm__ __volatile__("mov %[v], %%cr3"::[v]"r"(v));
+}
+
+static inline uint32_t read_cr4(void)
+{
+    uint32_t cr4;
+    __asm__ __volatile__("mov %%cr4, %[v]":[v]"=r"(cr4));
+    return cr4;
+}
+
+static inline void write_cr4(uint32_t v)
+{
+    __asm__ __volatile__("mov %[v], %%cr4"::[v]"r"(v));
 }
 
 static inline void far_jump(uint32_t selector, uint32_t offset)
