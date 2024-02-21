@@ -122,15 +122,15 @@ int memory_create_map(pde_t * page_dir, uint32_t vaddr, uint32_t paddr, int coun
 {
     for (int i = 0; i < count; i++)
     {
-        log_printf("create map: v-0x%x, p-0x%x, perm:0x%x", vaddr, paddr, perm);
+        //log_printf("create map: v-0x%x, p-0x%x, perm:0x%x", vaddr, paddr, perm);
         pte_t * pte = find_pte(page_dir, vaddr, 1);
         if (pte == (pte_t *) 0)
         {
-            log_printf("create pte table failed!");
+            //log_printf("create pte table failed!");
             return -1;
         }
 
-        log_printf("pte addr:0x%x", (uint32_t)pte);
+        //log_printf("pte addr:0x%x", (uint32_t)pte);
         ASSERT(pte->present == 0);
 
         pte->v = paddr | perm | PTE_P;
@@ -146,9 +146,10 @@ void create_kernel_table(void)
     extern uint8_t s_text[], e_text[], s_data[];
     extern uint8_t kernel_base[];
     static memory_map_t kernel_map[] = {
-        {kernel_base,    s_text,                    kernel_base,      PTE_W},
-        {s_text,         e_text,                    s_text,           0},
-        {s_data,         (void*) MEM_EBDA_START,    s_data,           PTE_W},
+        {kernel_base,           s_text,                    kernel_base,            PTE_W},
+        {s_text,                e_text,                    s_text,                 0},
+        {s_data,                (void*)MEM_EBDA_START,     s_data,                 PTE_W},
+        {(void*)MEM_EXT_START,  (void*)MEM_EXT_END,        (void*)MEM_EXT_START,   PTE_W}
     };
 
     for (int i = 0; i < sizeof(kernel_map) / sizeof(memory_map_t); i++)
@@ -163,6 +164,24 @@ void create_kernel_table(void)
         memory_create_map(kernel_page_dir, vstart, (uint32_t)paddr, page_count, map->perm);
     }
 
+}
+
+//创建用户虚拟内存
+uint32_t memory_create_uvm()
+{
+    pde_t * page_dir = (pde_t *) addr_alloc_page(&paddr_alloc, 1);
+    if (page_dir == 0)
+    {
+        return 0;
+    }
+    kernel_memset((void *) page_dir, 0, MEM_PAGE_SIZE);
+    uint32_t user_pde_start = pde_index(MEMORY_TASK_BASE);
+    for (int i = 0; i < user_pde_start; i++)
+    {
+        page_dir[i].v = kernel_page_dir[i].v;
+    }
+    
+    return (uint32_t) page_dir;
 }
 
 /**

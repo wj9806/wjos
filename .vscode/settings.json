@@ -24,6 +24,7 @@
         "memory.h": "c",
         "stdarg.h": "c",
         "mmu.h": "c",
-        "bitmap.h": "c"
+        "bitmap.h": "c",
+        "log.h": "c"
     },
 }
