@@ -103,7 +103,7 @@ void load_kernel(void)
         die(-1);
     }
 
-    //enable_page_mode();
+    enable_page_mode();
     
     //跳转到kernel_init
     ((void (*)(boot_info_t *))kernel_entry)(&boot_info);

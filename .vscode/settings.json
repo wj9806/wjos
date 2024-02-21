@@ -22,6 +22,8 @@
         "list.h": "c",
         "mutex.h": "c",
         "memory.h": "c",
-        "stdarg.h": "c"
+        "stdarg.h": "c",
+        "mmu.h": "c",
+        "bitmap.h": "c"
     },
 }
