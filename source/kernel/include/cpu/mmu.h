@@ -91,7 +91,6 @@ static inline uint32_t get_pte_perm (pte_t * pte) {
 
 /**
  * @brief 重新加载整个页表
- * @param vaddr 页表的虚拟地址
  */
 static inline void mmu_set_page_dir (uint32_t paddr) {
     // 将虚拟地址转换为物理地址

@@ -6,6 +6,7 @@
 #include "cpu/cpu.h"
 #include "tools/log.h"
 #include "cpu/irq.h"
+#include "cpu/mmu.h"
 #include "core/memory.h"
 
 static uint32_t idle_task_stack[IDLE_TASK_SIZE];
@@ -104,9 +105,14 @@ void task_manager_init(void)
 
 void task_first_init(void)
 {
-    task_init(&task_manager.first_task, "first_task", 0, 0);
+    void first_task_entry (void);
+    uint32_t first_start = (uint32_t) first_task_entry;
+
+    task_init(&task_manager.first_task, "first_task", first_start, 0);
     write_tr(task_manager.first_task.tss_sel);
     task_manager.curr_task = &task_manager.first_task;
+
+    mmu_set_page_dir(task_manager.first_task.tss.cr3);
 }
 
 task_t * task_first_task(void)
