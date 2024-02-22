@@ -38,6 +38,7 @@ static int tss_init(task_t * task, uint32_t entry, uint32_t esp)
         gdt_free_sel(tss_sel);
         return -1;
     }
+    //设置页表
     task->tss.cr3 = page_dir;
 
     task->tss_sel = tss_sel;
@@ -105,14 +106,23 @@ void task_manager_init(void)
 
 void task_first_init(void)
 {
+    extern uint8_t s_first_start[], e_first_task[];
     void first_task_entry (void);
     uint32_t first_start = (uint32_t) first_task_entry;
+
+    uint32_t copy_size = (uint32_t)(e_first_task - s_first_start);
+    uint32_t alloc_size = 10 * MEM_PAGE_SIZE;
+    ASSERT(copy_size < alloc_size);
 
     task_init(&task_manager.first_task, "first_task", first_start, 0);
     write_tr(task_manager.first_task.tss_sel);
     task_manager.curr_task = &task_manager.first_task;
 
     mmu_set_page_dir(task_manager.first_task.tss.cr3);
+
+    // 分配一页内存供代码存放使用，然后将代码复制过去
+    memory_alloc_page_for(first_start, alloc_size, PTE_P | PTE_W);
+    kernel_memcpy((void *)first_start, s_first_start, copy_size);
 }
 
 task_t * task_first_task(void)

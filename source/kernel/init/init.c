@@ -18,8 +18,9 @@ void kernel_init (boot_info_t * boot_info)
     ASSERT(boot_info->ram_region_count != 0);
     //cpu 初始化
     cpu_init();
-    memory_init(boot_info);
     log_init();
+    memory_init(boot_info);
+    
     //添加缺省的异常捕获函数
     irq_init();
     time_init();
