@@ -48,7 +48,6 @@ include_directories(
 add_subdirectory(./source/boot)
 add_subdirectory(./source/loader)
 add_subdirectory(./source/kernel)
-# add_subdirectory(./source/applib)
 # add_subdirectory(./source/shell)
 # add_subdirectory(./source/init)
 # add_subdirectory(./source/loop)

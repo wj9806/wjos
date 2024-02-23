@@ -113,3 +113,36 @@ simple_switch:
     pop %ebx
     pop %ebp
     ret
+
+    .global exception_handle_syscall
+    .extern handle_syscall
+exception_handle_syscall:
+    pusha
+    push %ds
+    push %es
+    push %fs
+    push %gs
+    pushf
+
+    // 使用内核段寄存器，避免使用应用层的
+	mov $(KERNEL_SELECTOR_DS), %eax
+	mov %eax, %ds
+	mov %eax, %es
+	mov %eax, %fs
+	mov %eax, %gs
+
+    mov %esp, %eax
+    push %eax
+    call handle_syscall
+    add $4, %esp
+
+    popf
+    pop %gs
+    pop %fs
+    pop %es
+    pop %ds
+    popa
+
+    # 5个参数，每个参数4字节 
+    # lib_syscall.h sys_call函数
+    retf $(5 * 4)

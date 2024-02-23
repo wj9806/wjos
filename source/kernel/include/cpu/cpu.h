@@ -66,7 +66,8 @@ typedef struct _tss_t
 #define SEG_TYPE_RW        (1 << 1)
 
 // 中断32位门描述符
-#define GATE_TYPE_INT	   (0xE << 8)		
+#define GATE_TYPE_INT	   (0xE << 8)	
+#define GATE_TYPE_SYSCALL  (0xC << 8)		
 //是否存在
 #define GATE_P_PRESENT     (1 << 15)
 #define GATE_DPL_0          (0 << 3)

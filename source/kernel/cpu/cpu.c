@@ -1,6 +1,7 @@
 #include "cpu/cpu.h"
 #include "os_cfg.h"
 #include "comm/cpu_instr.h"
+#include "core/syscall.h"
 #include "ipc/mutex.h"
 
 static segment_desc_t gdt_table[GDT_TABLE_SIZE];
@@ -49,6 +50,12 @@ void init_gdt()
     segment_desc_set(KERNEL_SELECTOR_CS, 0, 0xFFFFFFFF, 
         SEG_P_PRESENT | SEG_DPL_0 | SEG_S_NORMAL 
         | SEG_TYPE_CODE | SEG_TYPE_RW | SEG_D
+    );
+
+    //调用门
+    gate_desc_set((gate_desc_t *) (gdt_table + (SELECTOR_SYSCALL >> 3)), 
+        KERNEL_SELECTOR_CS, (uint32_t) exception_handle_syscall,
+        GATE_P_PRESENT | GATE_DPL_3 | GATE_TYPE_SYSCALL | SYSCALL_PARAM_COUNT
     );
 
     lgdt((uint32_t)gdt_table, sizeof(gdt_table));
