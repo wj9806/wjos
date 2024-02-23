@@ -12,7 +12,7 @@
 static uint32_t idle_task_stack[IDLE_TASK_SIZE];
 static task_manager_t task_manager;
 
-static int tss_init(task_t * task, uint32_t entry, uint32_t esp)
+static int tss_init(task_t * task, int flag, uint32_t entry, uint32_t esp)
 {
     int tss_sel = gdt_alloc_desc();
     if (tss_sel < 0)
@@ -25,30 +25,58 @@ static int tss_init(task_t * task, uint32_t entry, uint32_t esp)
     );
     
     kernel_memset(&task->tss, 0, sizeof(tss_t));
+
+    int code_sel, data_sel;
+    if (flag & TASK_FLAGS_SYSTEM)
+    {
+       code_sel = KERNEL_SELECTOR_CS;
+       data_sel = KERNEL_SELECTOR_DS;
+    }
+    else
+    {
+        code_sel = task_manager.app_code_sel | SEG_CPL_3;
+        data_sel = task_manager.app_data_sel | SEG_CPL_3;
+    }
+
+    uint32_t kernel_stack = memory_alloc_page();
+    if (kernel_stack == 0)
+    {
+        goto tss_init_failed;
+    }
+    
     task->tss.eip = entry;
-    task->tss.esp = task->tss.esp0 = esp;
-    task->tss.ss = task->tss.ss0 = KERNEL_SELECTOR_DS;
-    task->tss.es = task->tss.ds = task->tss.fs = task->tss.gs = KERNEL_SELECTOR_DS;
-    task->tss.cs = KERNEL_SELECTOR_CS;
+    task->tss.esp = esp;
+    task->tss.esp0 = kernel_stack + MEM_PAGE_SIZE;
+    task->tss.ss = data_sel;
+    task->tss.ss0 = KERNEL_SELECTOR_DS;
+    task->tss.es = task->tss.ds = task->tss.fs = task->tss.gs = data_sel;
+    task->tss.cs = code_sel;
     task->tss.eflags = EFLAGS_IF | EFLAGS_DEFAULT;
 
     uint32_t page_dir = memory_create_uvm();
     if (page_dir == 0)
     {
         gdt_free_sel(tss_sel);
-        return -1;
+        goto tss_init_failed;
     }
     //设置页表
     task->tss.cr3 = page_dir;
 
     task->tss_sel = tss_sel;
     return 0;
+tss_init_failed:
+    gdt_free_sel(tss_sel);
+    if(kernel_stack) 
+    {
+        memory_free_page(kernel_stack);
+    }
+    return -1;
 }
 
-int task_init(task_t * task, const char * name, uint32_t entry, uint32_t esp)
+int task_init(task_t * task, const char * name, int flag, uint32_t entry, uint32_t esp)
 {
     ASSERT(task != (task_t*)0);
-    tss_init(task, entry, esp);
+    tss_init(task, flag, entry, esp);
 
     kernel_strncpy(task->name, name, TASK_NAME_SIZE);
     task->state = TASK_CREATED;
@@ -95,12 +123,23 @@ static void idle_task_entry(void)
 
 void task_manager_init(void)
 {
+    int sel = gdt_alloc_desc();
+    segment_desc_set(sel, 0x000000000, 0xFFFFFFFF, 
+        SEG_P_PRESENT | SEG_DPL_3 | SEG_S_NORMAL | SEG_TYPE_DATA | SEG_TYPE_RW | SEG_D);
+    task_manager.app_data_sel = sel;
+
+    sel = gdt_alloc_desc();
+    segment_desc_set(sel, 0x000000000, 0xFFFFFFFF, 
+        SEG_P_PRESENT | SEG_DPL_3 | SEG_S_NORMAL | SEG_TYPE_CODE | SEG_TYPE_RW | SEG_D);
+    task_manager.app_code_sel = sel;
+
+
     task_manager.curr_task = (task_t *) 0;
     list_init(&task_manager.ready_list);
     list_init(&task_manager.task_list);
     list_init(&task_manager.sleep_list);
 
-    task_init(&task_manager.idle_task, "idle-task", 
+    task_init(&task_manager.idle_task, "idle-task", TASK_FLAGS_SYSTEM, 
         (uint32_t)idle_task_entry, (uint32_t) (idle_task_stack + IDLE_TASK_SIZE));
 }
 
@@ -114,14 +153,14 @@ void task_first_init(void)
     uint32_t alloc_size = 10 * MEM_PAGE_SIZE;
     ASSERT(copy_size < alloc_size);
 
-    task_init(&task_manager.first_task, "first_task", first_start, 0);
+    task_init(&task_manager.first_task, "first_task", 0, first_start, first_start + alloc_size);
     write_tr(task_manager.first_task.tss_sel);
     task_manager.curr_task = &task_manager.first_task;
 
     mmu_set_page_dir(task_manager.first_task.tss.cr3);
 
     // 分配一页内存供代码存放使用，然后将代码复制过去
-    memory_alloc_page_for(first_start, alloc_size, PTE_P | PTE_W);
+    memory_alloc_page_for(first_start, alloc_size, PTE_P | PTE_W | PTE_U);
     kernel_memcpy((void *)first_start, s_first_start, copy_size);
 }
 

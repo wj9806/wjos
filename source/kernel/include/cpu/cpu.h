@@ -48,6 +48,9 @@ typedef struct _tss_t
 #define SEG_DPL_0          (0 << 5)
 #define SEG_DPL_3          (3 << 5)
 
+#define SEG_CPL_0          (0 << 0)
+#define SEG_CPL_3          (3 << 0)
+
 //系统段
 #define SEG_S_SYSTEM       (0 << 4)
 //普通

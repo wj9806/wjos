@@ -11,6 +11,8 @@
 //所以10次节拍后放弃时间片
 #define TASK_TIME_SLICE_DEFAULT               (100/10)
 
+#define TASK_FLAGS_SYSTEM                     (1 << 0)
+
 typedef struct _task_t
 {
     //ESP寄存器指针
@@ -38,7 +40,7 @@ typedef struct _task_t
 } task_t;
 
 //entry 入口地址
-int task_init(task_t * task, const char * name, uint32_t entry, uint32_t esp);
+int task_init(task_t * task, const char * name, int flag, uint32_t entry, uint32_t esp);
 void task_switch_from_to(task_t* from, task_t* to);
 
 //任务管理器
@@ -57,6 +59,11 @@ typedef struct _task_manager_t
 
     //空闲进程
     task_t idle_task;
+
+    //代码段选择子
+    int app_code_sel;
+    //数据段选择子
+    int app_data_sel;
 } task_manager_t;
 
 void task_manager_init(void);

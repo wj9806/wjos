@@ -48,6 +48,12 @@
 #define PIC_OCW2_EOI		(1 << 5)		// 1 - 非特殊结束中断EOI命令
 #define IRQ_PIC_START		0x20			// PIC中断起始号
 
+#define ERR_PAGE_P          (1 << 0)
+#define ERR_PAGE_WR         (1 << 1)
+#define ERR_PAGE_US         (1 << 1)
+
+#define ERR_EXT             (1 << 0)
+#define ERR_IDT             (1 << 1)
 
 /**
  * 中断发生时相应的栈结构，暂时为无特权级发生的情况
@@ -59,6 +65,7 @@ typedef struct _exception_frame_t
     uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
     uint32_t num, error_code;
     uint32_t eip, cs, eflags;
+    uint32_t esp3, ss3;
 }exception_frame_t;
 
 
