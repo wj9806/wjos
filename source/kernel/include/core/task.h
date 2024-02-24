@@ -25,6 +25,8 @@ typedef struct _task_t
         TASK_WAITTING,   //任务等待
     } state;
 
+    int tid;
+
     int sleep_ticks;
     int time_ticks;
     int slice_ticks;
@@ -91,4 +93,6 @@ void task_time_tick(void);
 
 //延时毫秒数
 void sys_sleep(uint32_t ms);
+
+int sys_gettid(void);
 #endif

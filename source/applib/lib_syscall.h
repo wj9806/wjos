@@ -17,6 +17,7 @@ typedef struct _syscall_args_t
 
 static inline int sys_call(syscall_args_t* args)
 {
+    int ret;
     uint32_t addr[] = {0, SELECTOR_SYSCALL | 0};
     __asm__ __volatile__(
         "push %[arg3]\n\t"
@@ -24,9 +25,13 @@ static inline int sys_call(syscall_args_t* args)
         "push %[arg1]\n\t"
         "push %[arg0]\n\t"
         "push %[id]\n\t"
-        "lcalll *(%[a])"::[arg3]"r"(args->arg3), [arg2]"r"(args->arg2),
+        "lcalll *(%[a])"
+        :"=a"(ret)
+        :[arg3]"r"(args->arg3), [arg2]"r"(args->arg2),
         [arg1]"r"(args->arg1), [arg0]"r"(args->arg0), [id]"r"(args->id),
         [a]"r"(addr));
+
+    return ret;
 }
 
 
@@ -40,6 +45,24 @@ static inline void sleep(int ms)
     syscall_args_t args;
     args.id = SYS_SLEEP;
     args.arg0 = ms;
+
+    sys_call(&args);
+}
+
+static inline int gettid(void)
+{
+    syscall_args_t args;
+    args.id = SYS_GETTID;
+
+    return sys_call(&args);
+}
+
+static inline void print_msg(const char * fmt, int arg)
+{
+    syscall_args_t args;
+    args.id = SYS_PRINT_MSG;
+    args.arg0 = (int)fmt;
+    args.arg1 = arg;
 
     sys_call(&args);
 }

@@ -88,6 +88,8 @@ int task_init(task_t * task, const char * name, int flag, uint32_t entry, uint32
     node_init(&task->wait_node);
     
     irq_state_t state = irq_enter_protection();
+    //每个task指针都不一样
+    task->tid = (uint32_t)task;
     task_set_ready(task);
     list_insert_last(&task_manager.task_list, &task->all_node);
     irq_leave_protection(state);
@@ -295,4 +297,11 @@ void sys_sleep(uint32_t ms)
 
     task_dispatch();
     irq_leave_protection(state);
+}
+
+int sys_gettid(void)
+{
+    task_t * task = task_current();
+
+    return task->tid;
 }
