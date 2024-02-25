@@ -8,6 +8,7 @@
 #include "cpu/irq.h"
 #include "cpu/mmu.h"
 #include "core/memory.h"
+#include "core/syscall.h"
 
 static uint32_t idle_task_stack[IDLE_TASK_SIZE];
 static task_manager_t task_manager;
@@ -109,6 +110,26 @@ int task_init(task_t * task, const char * name, int flag, uint32_t entry, uint32
     //     task->stack = pesp;
     // }
     return 0;
+}
+
+void task_uninit(task_t * task)
+{
+    //gdt释放
+    if (task->tss_sel)
+    {
+        gdt_free_sel(task->tss_sel);
+    }
+    //
+    if (task->tss.esp0)
+    {
+        memory_free_page(task->tss.esp - MEM_PAGE_SIZE);
+    }
+    //页表释放
+    if (task->tss.cr3)
+    {
+        memory_destroy_uvm(task->tss.cr3);
+    }
+    kernel_memset(task, 0, sizeof(task_t));
 }
 
 void simple_switch(uint32_t ** from, uint32_t * to);
@@ -312,11 +333,6 @@ int sys_gettid(void)
     return task->tid;
 }
 
-int sys_fork(void)
-{
-    return -1;
-}
-
 static task_t * alloc_task (void)
 {
     task_t * task = (task_t *) 0;
@@ -339,4 +355,57 @@ static void free_task(task_t * task)
     mutex_lock(&task_table_mutex);
     task->name[0] = '\0';
     mutex_unlock(&task_table_mutex);
+}
+
+//父进程调用返回子进程的id
+//子进程调用返回0
+//fork后子进程和父进程不共用同一块数据
+int sys_fork(void)
+{
+    task_t * parent_task = task_current();
+    task_t * child_task = alloc_task();
+    if (child_task == (task_t *)0)
+    {
+        goto fork_failed;
+    }
+
+    syscall_frame_t * frame = (syscall_frame_t *)(parent_task->tss.esp0 - sizeof(syscall_frame_t));
+    int err = task_init(child_task, parent_task->name, 
+            0, frame->eip, frame->esp + sizeof(uint32_t) * SYSCALL_PARAM_COUNT);
+    if (err < 0)
+    {
+        goto fork_failed;
+    }
+    
+    tss_t * tss = &child_task->tss;
+    //子进程从eax中获取返回值
+    tss->eax = 0;
+    tss->ebx = frame->ebx;
+    tss->ecx = frame->ecx;
+    tss->edx = frame->edx;
+    tss->esi = frame->esi;
+    tss->edi = frame->edi;
+    tss->ebp = frame->ebp;
+    tss->cs = frame->cs;
+    tss->ds = frame->ds;
+    tss->es = frame->es;
+    tss->fs = frame->fs;
+    tss->gs = frame->gs;
+    tss->eflags = frame->eflags;
+    child_task->parent = parent_task;
+
+    //设置页表 (从父进程中拷贝，不能和父进程公用同一块页表)
+    if ((tss->cr3 = memory_copy_uvm(parent_task->tss.cr3)) < 0)
+    {
+        goto fork_failed;
+    }
+    return child_task->tid;
+fork_failed:   
+    if (child_task)
+    {
+        task_uninit(child_task);
+        free_task(child_task);
+    }
+    
+    return -1;
 }
