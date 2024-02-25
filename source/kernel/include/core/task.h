@@ -27,6 +27,8 @@ typedef struct _task_t
 
     int tid;
 
+    struct _task_t * parent;
+
     int sleep_ticks;
     int time_ticks;
     int slice_ticks;
@@ -95,4 +97,6 @@ void task_time_tick(void);
 void sys_sleep(uint32_t ms);
 
 int sys_gettid(void);
+
+int sys_fork(void);
 #endif
