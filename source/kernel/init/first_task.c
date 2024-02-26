@@ -19,6 +19,8 @@ int first_task_main(void)
     {
         count = 100;
         print_msg("child: %d", tid);
+        char* argv[] = {"arg1", "arg2"};
+        execve("/shell.elf", argv, (char**)0);
     } else {
         print_msg("child task id: %d", tid);
         print_msg("parent: %d", tid);

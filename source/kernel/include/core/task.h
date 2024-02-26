@@ -13,6 +13,14 @@
 
 #define TASK_FLAGS_SYSTEM                     (1 << 0)
 
+typedef struct _task_args_t
+{
+    //返回地址
+    uint32_t ret_addr;
+    uint32_t argc;
+    char ** argv;
+} task_args_t;
+
 typedef struct _task_t
 {
     //ESP寄存器指针
@@ -100,4 +108,6 @@ void sys_sleep(uint32_t ms);
 int sys_gettid(void);
 
 int sys_fork(void);
+
+int sys_execve(const char * name, char ** argv, char ** envp);
 #endif

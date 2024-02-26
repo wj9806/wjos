@@ -4,6 +4,36 @@
 #include "tools/log.h"
 
 
+int strings_count(char ** start)
+{
+    int count = 0;
+    if (start)
+    {
+        while (*start++)
+        {
+            count++;
+        }
+        
+    }
+    return count;
+}
+
+//从路径中获取文件名
+char * get_file_name(const char * name)
+{
+    char * s = (char *)name;
+    while (*s != '\0')
+    {
+        s++;
+    }
+    
+    while ((*s != '/') && (*s != '\\') && (s >= name))
+    {
+        s--;
+    }
+    return s+1;
+}
+
 void kernel_strcpy(char * dest, const char * src)
 {
     if (!dest || !src) {

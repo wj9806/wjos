@@ -74,4 +74,15 @@ static inline int fork()
     sys_call(&args);
 }
 
+//在父进程中fork一个子进程，在子进程中调用exec函数启动新的程序
+static inline int execve(const char * name, char *const argv[], char *const envp[])
+{
+    syscall_args_t args;
+    args.id = SYS_EXECVE;
+    args.arg0 = (int)name;
+    args.arg1 = (int)argv;
+    args.arg2 = (int)envp;
+    return sys_call(&args);
+}
+
 #endif

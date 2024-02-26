@@ -5,6 +5,7 @@
 
 #define SYS_SLEEP                   0
 #define SYS_GETTID                  1
+#define SYS_EXECVE                  2
 #define SYS_FORK                    3
 #define SYS_PRINT_MSG               100
 
