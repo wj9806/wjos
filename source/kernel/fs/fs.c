@@ -78,3 +78,13 @@ int sys_close(int file)
 {
     return 0;
 }
+
+int sys_isatty(int file)
+{
+    return -1;
+}
+
+int sys_fstat(int file, struct stat * st)
+{
+    return -1;
+}

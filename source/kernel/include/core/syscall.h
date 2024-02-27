@@ -15,6 +15,10 @@
 #define SYS_CLOSE                   53
 #define SYS_LSEEK                   54
 
+#define SYS_ISATTY                  55
+#define SYS_FSTAT                   56
+#define SYS_SBRK                    57
+
 #define SYS_PRINT_MSG               100
 
 

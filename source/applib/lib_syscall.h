@@ -1,6 +1,9 @@
 #ifndef __LIB_SYSCALL_H__
 #define __LIB_SYSCALL_H__
 
+#include <sys/stat.h>
+#include <stddef.h>
+
 typedef struct _syscall_args_t
 {
     //操作系统函数id
@@ -34,5 +37,11 @@ int write(int file, char * ptr, int len);
 int close(int file);
 
 int lseek(int file, int ptr, int dir);
+
+int isatty(int file);
+
+int fstat(int file, struct stat * st);
+
+void * sbrk(ptrdiff_t incr);
 
 #endif
