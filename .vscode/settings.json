@@ -29,6 +29,7 @@
         "elf.h": "c",
         "syscall.h": "c",
         "stat.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "console.h": "c"
     },
 }

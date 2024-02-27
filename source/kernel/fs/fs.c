@@ -4,6 +4,7 @@
 #include "comm/cpu_instr.h"
 #include "comm/boot_info.h"
 #include "tools/klib.h"
+#include "dev/console.h"
 
 static uint8_t TEMP_ADDR[100*1024];
 static uint8_t * temp_pos;
@@ -67,7 +68,8 @@ int sys_write(int file, char * ptr, int len)
         {
             ptr[len] ='\0';
         }
-        log_printf("%s", ptr);
+        //log_printf("%s", ptr);
+        console_write(0, ptr, len);
     }
     else if (file == 0)
     {

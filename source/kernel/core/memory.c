@@ -2,6 +2,7 @@
 #include "cpu/mmu.h"
 #include "tools/log.h"
 #include "tools/klib.h"
+#include "dev/console.h"
 
 /**
  * 系统内存分两大块 1M以内给操作系统，1M以上给进程使用
@@ -146,10 +147,11 @@ void create_kernel_table(void)
     extern uint8_t s_text[], e_text[], s_data[];
     extern uint8_t kernel_base[];
     static memory_map_t kernel_map[] = {
-        {kernel_base,           s_text,                    kernel_base,            PTE_W},
-        {s_text,                e_text,                    s_text,                 0},
-        {s_data,                (void*)MEM_EBDA_START,     s_data,                 PTE_W},
-        {(void*)MEM_EXT_START,  (void*)MEM_EXT_END,        (void*)MEM_EXT_START,   PTE_W}
+        {kernel_base,                 s_text,                    kernel_base,                 PTE_W},
+        {s_text,                      e_text,                    s_text,                      0},
+        {s_data,                      (void*)MEM_EBDA_START,     s_data,                      PTE_W},
+        {(void *)CONSOLE_DISP_ADDR,   (void*)CONSOLE_DISP_END,   (void *)CONSOLE_DISP_ADDR,   PTE_W},
+        {(void*)MEM_EXT_START,        (void*)MEM_EXT_END,        (void*)MEM_EXT_START,        PTE_W}
     };
 
     for (int i = 0; i < sizeof(kernel_map) / sizeof(memory_map_t); i++)

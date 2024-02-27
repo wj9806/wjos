@@ -3,6 +3,7 @@
 #include "cpu/cpu.h"
 #include "cpu/irq.h"
 #include "dev/time.h"
+#include "dev/console.h"
 #include "tools/log.h"
 #include "tools/list.h"
 #include "tools/klib.h"
@@ -19,8 +20,9 @@ void kernel_init (boot_info_t * boot_info)
     //cpu 初始化
     cpu_init();
     log_init();
+    console_init();
     memory_init(boot_info);
-    
+
     //添加缺省的异常捕获函数
     irq_init();
     time_init();
