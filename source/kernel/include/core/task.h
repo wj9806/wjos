@@ -37,6 +37,10 @@ typedef struct _task_t
 
     struct _task_t * parent;
 
+    //堆的起始地址和结束地址
+    uint32_t heap_start;
+    uint32_t heap_end;
+
     int sleep_ticks;
     int time_ticks;
     int slice_ticks;

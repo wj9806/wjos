@@ -87,6 +87,8 @@ int task_init(task_t * task, const char * name, int flag, uint32_t entry, uint32
     task->parent = (task_t *) 0;
     task->state = TASK_CREATED;
     task->sleep_ticks = 0;
+    task->heap_start = 0;
+    task->heap_end = 0;
     task->time_ticks = TASK_TIME_SLICE_DEFAULT;
     task->slice_ticks = task->time_ticks;
     node_init(&task->all_node);
@@ -194,7 +196,9 @@ void task_first_init(void)
     ASSERT(copy_size < alloc_size);
 
     task_init(&task_manager.first_task, "first_task", 0, first_start, first_start + alloc_size);
-    
+    task_manager.first_task.heap_start = (uint32_t) e_first_task;
+    task_manager.first_task.heap_end = (uint32_t) e_first_task;
+
     write_tr(task_manager.first_task.tss_sel);
     task_manager.curr_task = &task_manager.first_task;
 
@@ -505,6 +509,8 @@ static uint32_t load_elf_file(task_t * task, const char * name, uint32_t page_di
             goto load_failed;
         }
         
+        task->heap_start = elf_phdr.p_vaddr + elf_phdr.p_memsz;
+        task->heap_end = task->heap_start;
     }
     
     sys_close(file);
@@ -580,7 +586,6 @@ int sys_execve(const char * name, char ** argv, char ** envp)
     frame->eflags = EFLAGS_IF | EFLAGS_DEFAULT;
     frame->esp = stack_top - sizeof(uint32_t) * SYSCALL_PARAM_COUNT;
     //传递参数
-
 
     task->tss.cr3 = new_page_dir;
     mmu_set_page_dir(new_page_dir);

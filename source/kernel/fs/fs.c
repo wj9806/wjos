@@ -58,8 +58,22 @@ int sys_read(int file, char * ptr, int len)
     return -1;
 }
 
+#include "tools/log.h"
 int sys_write(int file, char * ptr, int len)
 {
+    if (file = 1)
+        {
+        if (ptr[len - 1] != '\0')
+        {
+            ptr[len] ='\0';
+        }
+        log_printf("%s", ptr);
+    }
+    else if (file == 0)
+    {
+
+    }
+
     return -1;
 }
 

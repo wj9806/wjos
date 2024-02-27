@@ -28,6 +28,7 @@
         "log.h": "c",
         "elf.h": "c",
         "syscall.h": "c",
-        "stat.h": "c"
+        "stat.h": "c",
+        "stdint.h": "c"
     },
 }

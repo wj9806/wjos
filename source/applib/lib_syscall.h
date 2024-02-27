@@ -42,6 +42,10 @@ int isatty(int file);
 
 int fstat(int file, struct stat * st);
 
+//用于增长应用程序的数据空间increment字节
+//当incr=0时，返回当前的program break
+//成功时，返回新分配空间的起始地址
+//错误返回-1
 void * sbrk(ptrdiff_t incr);
 
 #endif
