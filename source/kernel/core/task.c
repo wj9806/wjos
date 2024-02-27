@@ -96,7 +96,7 @@ int task_init(task_t * task, const char * name, int flag, uint32_t entry, uint32
     irq_state_t state = irq_enter_protection();
     //每个task指针都不一样
     task->tid = (uint32_t)task;
-    task_set_ready(task);
+    
     list_insert_last(&task_manager.task_list, &task->all_node);
     irq_leave_protection(state);
 
@@ -112,6 +112,13 @@ int task_init(task_t * task, const char * name, int flag, uint32_t entry, uint32
     //     task->stack = pesp;
     // }
     return 0;
+}
+
+void task_start(task_t * task)
+{
+    irq_state_t state = irq_enter_protection();
+    task_set_ready(task);
+    irq_leave_protection(state);
 }
 
 void task_uninit(task_t * task)
@@ -172,6 +179,8 @@ void task_manager_init(void)
 
     task_init(&task_manager.idle_task, "idle-task", TASK_FLAGS_SYSTEM, 
         (uint32_t)idle_task_entry, (uint32_t) (idle_task_stack + IDLE_TASK_SIZE));
+
+    task_start(&task_manager.idle_task);
 }
 
 void task_first_init(void)
@@ -185,6 +194,7 @@ void task_first_init(void)
     ASSERT(copy_size < alloc_size);
 
     task_init(&task_manager.first_task, "first_task", 0, first_start, first_start + alloc_size);
+    
     write_tr(task_manager.first_task.tss_sel);
     task_manager.curr_task = &task_manager.first_task;
 
@@ -193,6 +203,7 @@ void task_first_init(void)
     // 分配一页内存供代码存放使用，然后将代码复制过去
     memory_alloc_page_for(first_start, alloc_size, PTE_P | PTE_W | PTE_U);
     kernel_memcpy((void *)first_start, s_first_start, copy_size);
+    task_start(&task_manager.first_task);
 }
 
 task_t * task_first_task(void)
@@ -254,7 +265,7 @@ void task_set_wakeup(task_t * task)
     list_remove(&task_manager.sleep_list, &task->run_node);
 }
 
-int sys_sched_yeild(void)
+int sys_yeild(void)
 {
     irq_state_t state = irq_enter_protection();
     if (list_count(&task_manager.ready_list) > 1)
@@ -401,6 +412,7 @@ int sys_fork(void)
     {
         goto fork_failed;
     }
+    task_start(child_task);
     return child_task->tid;
 fork_failed:   
     if (child_task)

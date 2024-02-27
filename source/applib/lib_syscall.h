@@ -85,4 +85,11 @@ static inline int execve(const char * name, char *const argv[], char *const envp
     return sys_call(&args);
 }
 
+static inline int yeild()
+{
+    syscall_args_t args;
+    args.id = SYS_YEILD;
+    sys_call(&args);
+}
+
 #endif

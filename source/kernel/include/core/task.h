@@ -95,7 +95,7 @@ void task_set_wakeup(task_t * task);
 task_t * task_current(void);
 
 //当前任务主动放弃cpu时间片
-int sys_sched_yeild(void);
+int sys_yeild(void);
 
 //任务分配
 void task_dispatch(void);
