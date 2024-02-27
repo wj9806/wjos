@@ -8,6 +8,13 @@
 #define SYS_EXECVE                  2
 #define SYS_FORK                    3
 #define SYS_YEILD                   4
+
+#define SYS_OPEN                    50
+#define SYS_READ                    51
+#define SYS_WRITE                   52
+#define SYS_CLOSE                   53
+#define SYS_LSEEK                   54
+
 #define SYS_PRINT_MSG               100
 
 

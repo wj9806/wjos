@@ -1,6 +1,7 @@
 #include "core/syscall.h"
 #include "core/task.h"
 #include "tools/log.h"
+#include "fs/fs.h"
 
 typedef int (*syscall_handler_t)(uint32_t arg0, uint32_t arg1, uint32_t arg2, uint32_t arg03);
 
@@ -10,12 +11,18 @@ void sys_print_msg(const char * fmt, int arg)
 }
 
 static const syscall_handler_t  sys_table[] = {
-    [SYS_SLEEP] = (syscall_handler_t)sys_sleep,
-	[SYS_GETTID] = (syscall_handler_t)sys_gettid,
-	[SYS_FORK] = (syscall_handler_t)sys_fork,
-	[SYS_PRINT_MSG] = (syscall_handler_t)sys_print_msg,
-	[SYS_EXECVE] = (syscall_handler_t)sys_execve,
-	[SYS_YEILD] = (syscall_handler_t)sys_yeild,
+    [SYS_SLEEP] 	=  (syscall_handler_t) sys_sleep,
+	[SYS_GETTID] 	=  (syscall_handler_t) sys_gettid,
+	[SYS_FORK] 	    =  (syscall_handler_t) sys_fork,
+	[SYS_PRINT_MSG] =  (syscall_handler_t) sys_print_msg,
+	[SYS_EXECVE]    =  (syscall_handler_t) sys_execve,
+	[SYS_YEILD]     =  (syscall_handler_t) sys_yeild,
+  
+	[SYS_OPEN] 		=  (syscall_handler_t) sys_open,
+	[SYS_READ] 		=  (syscall_handler_t) sys_read,
+	[SYS_WRITE] 	=  (syscall_handler_t) sys_write,
+	[SYS_CLOSE] 	=  (syscall_handler_t) sys_close,
+	[SYS_LSEEK] 	=  (syscall_handler_t) sys_lseek,
 };
 
 /**

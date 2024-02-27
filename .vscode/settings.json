@@ -26,6 +26,7 @@
         "mmu.h": "c",
         "bitmap.h": "c",
         "log.h": "c",
-        "elf.h": "c"
+        "elf.h": "c",
+        "syscall.h": "c"
     },
 }
