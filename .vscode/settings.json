@@ -30,6 +30,7 @@
         "syscall.h": "c",
         "stat.h": "c",
         "stdint.h": "c",
-        "console.h": "c"
+        "console.h": "c",
+        "keyboard.h": "c"
     },
 }

@@ -4,6 +4,7 @@
 #include "cpu/irq.h"
 #include "dev/time.h"
 #include "dev/console.h"
+#include "dev/keyboard.h"
 #include "tools/log.h"
 #include "tools/list.h"
 #include "tools/klib.h"
@@ -27,6 +28,8 @@ void kernel_init (boot_info_t * boot_info)
     irq_init();
     time_init();
     task_manager_init();
+
+    keyboard_init();
 }
 
 void move_to_first_task(void)

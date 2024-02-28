@@ -26,6 +26,7 @@
 #define IRQ21_CP            21
 
 #define IRQ0_TIMER          0x20
+#define IRQ1_KEYBOARD       0x21
 
 // PIC控制器相关的寄存器及位配置
 #define PIC0_ICW1			0x20
