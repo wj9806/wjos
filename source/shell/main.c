@@ -5,7 +5,7 @@ int main(int argc, char ** argv)
 {
     for (int i = 0; i < argc; i++)
     {
-        print_msg("arg: %s", (int)argv[i]);
+        printf("arg: %s\n", argv[i]);
     }
     sbrk(0);
     sbrk(100);
@@ -15,12 +15,12 @@ int main(int argc, char ** argv)
     printf("hello shell\n");
     for (int i = 0; i < argc; i++)
     {
-        print_msg("arg: %s", (int)argv[i]);
+        printf("arg: %s\n", argv[i]);
     }
     fork();
     for(;;)
     {
-        print_msg("task id:%d", gettid());
+        printf("task id:%d\n", gettid());
         yeild();
         sleep(1000);
     }
