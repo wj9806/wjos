@@ -113,6 +113,37 @@ static void move_next_line(console_t * console)
     
 }
 
+static int move_backword(console_t * console, int n)
+{
+    int status = -1;
+    for (int i = 0; i < n; i++)
+    {
+        if (console->cursor_col > 0)
+        {
+            console->cursor_col--;
+            status = 0;
+        }
+        else if (console->cursor_row > 0)
+        {
+            console->cursor_row--;
+            console->cursor_col = console->display_cols - 1;
+            status = 0;
+        }
+    }
+    
+    return status;
+}
+
+static void erase_backword(console_t * console)
+{
+    if (move_backword(console, 1) == 0)
+    {
+        show_char(console, ' ');
+        move_backword(console, 1);
+    }
+    
+}
+
 int console_init(void)
 {
     for (int i = 0; i < CONSOLE_NR; i++)
@@ -145,13 +176,27 @@ int console_write(int console, char * data, int size)
         char ch = *data++;
         switch (ch)
         {
-        case '\n':
+            case 0x7f:
+                //往回删除一个字符
+                erase_backword(c);
+                break;
+            case '\b':
+                //往左移动一个光标
+                move_backword(c, 1);
+                break;
+            case 'r':
             move_to_col0(c);
-            move_next_line(c);
-            break;
-        default:
-            show_char(c, ch);
-            break;
+                break;
+            case '\n':
+                move_to_col0(c);
+                move_next_line(c);
+                break;
+            default:
+                if ((ch >= ' ') && (ch <= '~'))
+                {
+                    show_char(c, ch);
+                }
+                break;
         }
         
     }

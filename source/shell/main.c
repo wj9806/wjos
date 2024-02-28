@@ -13,9 +13,9 @@ int main(int argc, char ** argv)
     sbrk(4096 * 2 + 200);
 
     // \b光标左移
-    print("abcd\b\b\b\bcd\n");
+    printf("abcd\b\b\b\bcd\n");
     //\x7f向左删除字符
-    print("abcd\x7f;fg");
+    printf("abcd\x7f;fg\n");
 
     printf("hello shell\n");
     for (int i = 0; i < argc; i++)
@@ -25,7 +25,7 @@ int main(int argc, char ** argv)
     fork();
     for(;;)
     {
-        printf("task id:%d\n", gettid());
+        //printf("task id:%d\n", gettid());
         yeild();
         sleep(1000);
     }

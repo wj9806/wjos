@@ -29,8 +29,8 @@ int first_task_main(void)
     for(;;)
     {
         sleep(1000);
-        print_msg("for task id=%d", tid);
-        print_msg("count=%d", count);
+        //print_msg("for task id=%d", tid);
+        //print_msg("count=%d", count);
     }
 
     return 0;
