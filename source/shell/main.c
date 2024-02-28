@@ -12,6 +12,11 @@ int main(int argc, char ** argv)
     sbrk(200);
     sbrk(4096 * 2 + 200);
 
+    // \b光标左移
+    print("abcd\b\b\b\bcd\n");
+    //\x7f向左删除字符
+    print("abcd\x7f;fg");
+
     printf("hello shell\n");
     for (int i = 0; i < argc; i++)
     {
