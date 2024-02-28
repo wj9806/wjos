@@ -10,6 +10,7 @@
 #define CONSOLE_NR           1
 
 #define ASCII_ESC           0x1b
+#define ESC_PARAM_MAX       10
 
 
 typedef enum _color_t {
@@ -31,6 +32,9 @@ typedef enum _color_t {
     COLOR_White			= 15
 } color_t;
 
+
+#define DEFAULT_FOREGROUND  COLOR_Gray
+
 //显示字符
 typedef union _disp_char_t
 {
@@ -49,12 +53,16 @@ typedef struct _console_t
     enum {
         CONSOLE_WRITE_NORMAL,
         CONSOLE_WRITE_ESC,
+        CONSOLE_WRITE_SQUARE,
     } write_state;
     disp_char_t * disp_base; // 显示基地址
     int cursor_row, cursor_col;
     int display_rows, display_cols;
     color_t foreground, background;
     int old_cursor_row, old_cursor_col;
+
+    int esc_param[ESC_PARAM_MAX];
+    int curr_param_index;
 } console_t;
 
 int console_init(void);

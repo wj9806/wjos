@@ -152,7 +152,7 @@ int console_init(void)
         int cursor_pos = read_cursor_pos();
 
         console->background =COLOR_Black;
-        console->foreground = COLOR_Gray;
+        console->foreground = DEFAULT_FOREGROUND;
         console->display_cols = CONSOLE_COL_MAX;
         console->display_rows = CONSOLE_ROW_MAX;
 
@@ -211,6 +211,36 @@ void restore_cursor(console_t * console)
     console->cursor_row = console->old_cursor_row;
 }
 
+static void clear_esc_param(console_t * console)
+{
+    kernel_memset(console->esc_param, 0, sizeof(console->esc_param));
+    console->curr_param_index = 0;
+}
+
+static void set_font_style(console_t * console)
+{
+    static const color_t color_table[] = {
+        COLOR_Black, COLOR_Red, COLOR_Green, COLOR_Yellow, // 0-3
+		COLOR_Blue, COLOR_Magenta, COLOR_Cyan, COLOR_White, // 4-7
+    };
+
+    for (int i = 0; i <= console->curr_param_index; i++)
+    {
+        int param = console->esc_param[i];
+		if ((param >= 30) && (param <= 37)) {  // 前景色：30-37
+			console->foreground = color_table[param - 30];
+		} else if ((param >= 40) && (param <= 47)) {
+			console->background = color_table[param - 40];
+		} else if (param == 39) { // 39=默认前景色
+			console->foreground = DEFAULT_FOREGROUND;
+		} else if (param == 49) { // 49=默认背景色
+			console->background = COLOR_Black;
+		}
+        
+    }
+    
+}
+
 static void write_esc(console_t * c, char ch)
 {
     switch (ch)
@@ -222,9 +252,42 @@ static void write_esc(console_t * c, char ch)
     case '8':
         restore_cursor(c);
         c->write_state = CONSOLE_WRITE_NORMAL;
+        break;
+    case '[':
+        clear_esc_param(c);
+        c->write_state = CONSOLE_WRITE_SQUARE;
+        break;
     default:
         c->write_state = CONSOLE_WRITE_NORMAL;
         break;
+    }
+}
+
+static void write_esc_square(console_t * c, char ch)
+{
+    if ((ch >= '0') && (ch <= '9'))
+    {   
+        //如果是数字
+        //获取当
+        int *param = &c->esc_param[c->curr_param_index];
+        *param = *param * 10 + ch - '0';
+    }
+    else if (ch == ';' && (c->curr_param_index < ESC_PARAM_MAX))
+    {
+        //分号。说明当前参数处理完了
+        c->curr_param_index++;
+    }
+    else
+    {
+        switch (ch)
+        {
+        case 'm':
+            set_font_style(c);
+            break;
+        default:
+            break;
+        }
+        c->write_state = CONSOLE_WRITE_NORMAL;
     }
 }
 
@@ -243,6 +306,9 @@ int console_write(int console, char * data, int size)
             break;
         case CONSOLE_WRITE_ESC:
             write_esc(c, ch);
+            break;
+        case CONSOLE_WRITE_SQUARE:
+            write_esc_square(c, ch);
             break;
         default:
             break;
