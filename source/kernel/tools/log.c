@@ -3,16 +3,19 @@
 #include "tools/klib.h"
 #include "comm/cpu_instr.h"
 #include "ipc/mutex.h"
-#include "dev/console.h"
+#include "dev/dev.h"
 
 #define LOG_USE_COM         0
 #define COM1_PORT           0x3F8       // RS232端口0初始化
+
+static int log_dev_id;
 
 static mutex_t mutex;
 
 void log_init(void)
 {
     mutex_init(&mutex);
+    log_dev_id = dev_open(DEV_TTY, 0, (void *)0);
 #if LOG_USE_COM
     outb(COM1_PORT + 1, 0x00);    // Disable all interrupts
     outb(COM1_PORT + 3, 0x80);    // Enable DLAB (set baud rate divisor)
@@ -50,9 +53,9 @@ void log_printf(const char * fmt, ...)
     outb(COM1_PORT, '\r');
     outb(COM1_PORT, '\n');
 #else
-    console_write(0, str_buf, kernel_strlen(str_buf));
+    dev_write(log_dev_id, 0, str_buf, kernel_strlen(str_buf));
     char c = '\n';
-    console_write(0, &c, 1);
+    dev_write(log_dev_id, 0, &c, 1);
 #endif
     mutex_unlock(&mutex);
 }

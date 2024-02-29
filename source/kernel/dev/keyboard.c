@@ -62,9 +62,14 @@ static const key_map_t map_table[256] = {
 
 void keyboard_init (void)
 {
-    kernel_memset(&keyboard_state, 0, sizeof(keyboard_state));
-    irq_install(IRQ1_KEYBOARD, (irq_handle_t) exception_handler_keyboard);
-    irq_enable(IRQ1_KEYBOARD);
+    static int inited = 0;
+    if (!inited)
+    {
+        kernel_memset(&keyboard_state, 0, sizeof(keyboard_state));
+        irq_install(IRQ1_KEYBOARD, (irq_handle_t) exception_handler_keyboard);
+        irq_enable(IRQ1_KEYBOARD);
+        inited = 1;
+    }
 }
 
 //是否是按下操作

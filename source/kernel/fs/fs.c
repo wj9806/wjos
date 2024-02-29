@@ -64,12 +64,13 @@ int sys_write(int file, char * ptr, int len)
 {
     if (file = 1)
         {
-        if (ptr[len - 1] != '\0')
-        {
-            ptr[len] ='\0';
-        }
-        //log_printf("%s", ptr);
-        console_write(0, ptr, len);
+        // if (ptr[len - 1] != '\0')
+        // {
+        //     ptr[len] ='\0';
+        // }
+        ptr[len] = '\0';
+        log_printf("%s", ptr);
+        //console_write(0, ptr, len);
     }
     else if (file == 0)
     {

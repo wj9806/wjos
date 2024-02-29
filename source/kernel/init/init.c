@@ -3,8 +3,7 @@
 #include "cpu/cpu.h"
 #include "cpu/irq.h"
 #include "dev/time.h"
-#include "dev/console.h"
-#include "dev/keyboard.h"
+
 #include "tools/log.h"
 #include "tools/list.h"
 #include "tools/klib.h"
@@ -17,19 +16,17 @@
  */
 void kernel_init (boot_info_t * boot_info) 
 {
-    ASSERT(boot_info->ram_region_count != 0);
     //cpu 初始化
     cpu_init();
-    log_init();
-    console_init();
-    memory_init(boot_info);
-
     //添加缺省的异常捕获函数
     irq_init();
+    log_init();
+    
+    memory_init(boot_info);
+
     time_init();
     task_manager_init();
 
-    keyboard_init();
 }
 
 void move_to_first_task(void)

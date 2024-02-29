@@ -144,26 +144,32 @@ static void erase_backword(console_t * console)
     
 }
 
-int console_init(void)
+int console_init(int idx)
 {
-    for (int i = 0; i < CONSOLE_NR; i++)
+    console_t * console = console_buf + idx;
+
+    console->background =COLOR_Black;
+    console->foreground = DEFAULT_FOREGROUND;
+    console->display_cols = CONSOLE_COL_MAX;
+    console->display_rows = CONSOLE_ROW_MAX;
+    console->disp_base = (disp_char_t *)CONSOLE_DISP_ADDR + idx * (CONSOLE_COL_MAX * CONSOLE_ROW_MAX);
+    if (idx == 0)
     {
-        console_t * console = console_buf + i;
         int cursor_pos = read_cursor_pos();
-
-        console->background =COLOR_Black;
-        console->foreground = DEFAULT_FOREGROUND;
-        console->display_cols = CONSOLE_COL_MAX;
-        console->display_rows = CONSOLE_ROW_MAX;
-
         console->cursor_col = cursor_pos % console->display_cols;
         console->cursor_row = cursor_pos / console->display_cols;
-        console->old_cursor_row = console->cursor_row;
-        console->old_cursor_col = console->cursor_col;
-
-        console->disp_base = (disp_char_t *)CONSOLE_DISP_ADDR + i * (CONSOLE_COL_MAX * CONSOLE_ROW_MAX);
-        //clear_display(console);
     }
+    else
+    {
+        console->cursor_col = 0;
+        console->cursor_row = 0;
+        clear_display(console);
+        update_cursor_pos(console);
+    }
+    
+    console->old_cursor_row = console->cursor_row;
+    console->old_cursor_col = console->cursor_col;
+    console->write_state = CONSOLE_WRITE_NORMAL;
    
     return 0;
 }
@@ -184,10 +190,10 @@ static void write_normal(console_t * c, char ch)
             move_backword(c, 1);
             break;
         case '\r':
-        move_to_col0(c);
+            move_to_col0(c);
             break;
         case '\n':
-            move_to_col0(c);
+            //move_to_col0(c);
             move_next_line(c);
             break;
         default:
@@ -345,29 +351,38 @@ static void write_esc_square(console_t * c, char ch)
     }
 }
 
-int console_write(int console, char * data, int size)
+int console_write(tty_t * tty)
 {
-    console_t * c = console_buf + console;
-    int len;
-    for (int len = 0; len < size; len++)
+    console_t * c = console_buf + tty->console_idx;
+    int len = 0;
+    do
     {
-        //取出字符
-        char ch = *data++;
-        switch (c->write_state)
+        char ch;
+        int err = tty_fifo_get(&tty->ofifo, &ch);
+        if (err < 0)
         {
-        case CONSOLE_WRITE_NORMAL:
-            write_normal(c, ch);
-            break;
-        case CONSOLE_WRITE_ESC:
-            write_esc(c, ch);
-            break;
-        case CONSOLE_WRITE_SQUARE:
-            write_esc_square(c, ch);
-            break;
-        default:
             break;
         }
-    }
+        
+        sem_notify(&tty->osem);
+
+        switch (c->write_state)
+        {
+            case CONSOLE_WRITE_NORMAL:
+                write_normal(c, ch);
+                break;
+            case CONSOLE_WRITE_ESC:
+                write_esc(c, ch);
+                break;
+            case CONSOLE_WRITE_SQUARE:
+                write_esc_square(c, ch);
+                break;
+            default:
+                break;
+        }
+        len++;
+    } while (1);
+
     update_cursor_pos(c);
     return len;
 }
