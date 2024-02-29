@@ -31,6 +31,7 @@
         "stat.h": "c",
         "stdint.h": "c",
         "console.h": "c",
-        "keyboard.h": "c"
+        "keyboard.h": "c",
+        "dev.h": "c"
     },
 }
