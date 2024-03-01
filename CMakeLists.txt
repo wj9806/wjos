@@ -39,19 +39,19 @@ enable_language(ASM)
 
 # 头文件搜索路径
 include_directories(
-    ${PROJECT_SOURCE_DIR}/source
-    ${PROJECT_SOURCE_DIR}/source/kernel/include
-    ${PROJECT_SOURCE_DIR}/../newlib/include
+    ${PROJECT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/kernel/include
+    ${PROJECT_SOURCE_DIR}/../libc/include
 )
 
 # 底层的若干子项目：含内核及应用程序
-add_subdirectory(./source/boot)
-add_subdirectory(./source/loader)
-add_subdirectory(./source/kernel)
-add_subdirectory(./source/applib)
-add_subdirectory(./source/shell)
-# add_subdirectory(./source/init)
-# add_subdirectory(./source/loop)
+add_subdirectory(./boot)
+add_subdirectory(./loader)
+add_subdirectory(./kernel)
+add_subdirectory(./applib)
+add_subdirectory(./shell)
+# add_subdirectory(./init)
+# add_subdirectory(./loop)
 
 # 添加编译依赖，先生成app库，再生成kernel和shell
 # 不加则cmake则可能先编译shell和kernel，而缺少libapp，导致编译错误

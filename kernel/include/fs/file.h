@@ -3,8 +3,8 @@
 
 #include "comm/types.h"
 
-#define FILE_TABLE_SIZE     2048
-#define FILE_NAME_SIZE      127
+#define FILE_TABLE_SIZE     512
+#define FILE_NAME_SIZE      64
 
 typedef enum _file_type_t
 {

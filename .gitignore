@@ -1,3 +1,5 @@
 build
 *.elf
 *.bin
+.idea
+cmake-build-debug
