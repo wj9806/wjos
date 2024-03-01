@@ -421,6 +421,6 @@ int console_select(int idx)
     curr_console_idx = idx;
     //更新光标位置
     update_cursor_pos(console);
-    char num = idx + '0';
-    show_char(console, num);
+    //char num = idx + '0';
+    //show_char(console, num);
 }

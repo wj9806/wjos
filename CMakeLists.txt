@@ -41,7 +41,7 @@ enable_language(ASM)
 include_directories(
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/kernel/include
-    ${PROJECT_SOURCE_DIR}/../libc/include
+    ${PROJECT_SOURCE_DIR}/libc/include
 )
 
 # 底层的若干子项目：含内核及应用程序

@@ -32,6 +32,7 @@
         "stdint.h": "c",
         "console.h": "c",
         "keyboard.h": "c",
-        "dev.h": "c"
+        "dev.h": "c",
+        "stdlib.h": "c"
     },
 }

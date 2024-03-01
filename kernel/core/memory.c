@@ -434,7 +434,7 @@ char * sys_sbrk(int incr)
         }
         
     }
-    log_printf("sbrk alloc %d mem success!, end=0x%x", incr, end);
+    //log_printf("sbrk alloc %d mem success!, end=0x%x", incr, end);
     task->heap_end = end;
     return (void *)pre_heap_end;
 }

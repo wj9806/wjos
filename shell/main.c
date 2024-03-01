@@ -1,50 +1,56 @@
-#include "lib_syscall.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "main.h"
+#include "lib_syscall.h"
 
 char cmd_buf[256];
 
+
+static cli_t cli;
+static const char * prompt = "[root@localhost ~] # ";
+
+static int do_help(int argc, char **argv)
+{
+    return 0;
+}
+
+static const cli_cmd_t cmd_list[] = {
+    {
+        .name = "help",
+        .usage = "help -- list supported command",
+        .do_func = do_help,
+    },
+};
+
+static void cli_init(void)
+{
+    cli.prompt = prompt;
+    memset(cli.curr_input, 0, CLI_INPUT_SIZE);
+
+    int size = sizeof(cmd_list) / sizeof(cmd_list[0]);
+    cli.cmd_start = cmd_list;
+    cli.cmd_end = cmd_list + size;
+}
+
+static void show_prompt(void)
+{
+    printf("%s", cli.prompt);
+    fflush(stdout);
+}
+
 int main(int argc, char ** argv)
 {
-    /**for (int i = 0; i < argc; i++)
-    {
-        printf("arg: %s\n", argv[i]);
-    }
-    sbrk(0);
-    sbrk(100);
-    sbrk(200);
-    sbrk(4096 * 2 + 200);
-
-    // \b光标左移
-    printf("abcd\b\b\b\bcd\n");
-    //\x7f向左删除字符
-    printf("abcd\x7f;fg\n");
-
-    //\033 是 ESC 的ascii
-    printf("\0337Hello,word!\0338123\n");  // ESC 7,8 输出123lo,word!
-    printf("\033[31;42mHello,word!\033[39;49m123\n");  // ESC [pn m, Hello,world红色，其余绿色
-    printf("123\033[2DHello,word!\n");  // 光标左移2，1Hello,word!
-    printf("123\033[2CHello,word!\n");  // 光标右移2，123  Hello,word!
-
-    printf("\033[31m");  // ESC [pn m, Hello,world红色，其余绿色
-    printf("\033[10;10H test!\n");  // 定位到10, 10，test!
-    printf("\033[20;20H test!\n");  // 定位到20, 20，test!
-    printf("\033[32;25;39m123\n");  // ESC [pn m, Hello,world红色，其余绿色 
-    **/
-    //清屏
-    //printf("\033[2J\n");
-
     int fd = open(argv[0], 0); //stdin
     dup(fd);                   //stdout
     dup(fd);                   //stderr
 
-    printf("hello shell\n");
+    cli_init();
+
+    puts("wjos start success!\n");
     for(;;)
     {
-        gets(cmd_buf);
-        puts(cmd_buf);
-
-        //printf("task id:%d\n", gettid());
-        //yeild();
-        //sleep(1000);
+        show_prompt();
+        gets(cli.curr_input);
     }
 }
