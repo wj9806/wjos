@@ -7,6 +7,8 @@
 #define TTY_OBUF_SIZE   512
 #define TTY_IBUF_SIZE   512
 #define TTY_OCRLF       (1<<0)
+#define TTY_INCLR       (1<<0)
+#define TTY_IECHO       (1<<1)
 
 /**
  * buf
@@ -44,6 +46,7 @@ typedef struct _tty_t
     sem_t isem;
 
     int oflags;
+    int iflags;
 
     int console_idx;
 } tty_t;
@@ -51,5 +54,7 @@ typedef struct _tty_t
 int tty_fifo_put(tty_fifo_t * fifo, char c);
 
 int tty_fifo_get(tty_fifo_t * fifo, char *c);
+
+void tty_in(int idx, char ch);
 
 #endif

@@ -28,6 +28,7 @@ static const syscall_handler_t  sys_table[] = {
 	[SYS_ISATTY] 	=  (syscall_handler_t) sys_isatty,
 	[SYS_FSTAT] 	=  (syscall_handler_t) sys_fstat,
 	[SYS_SBRK] 	    =  (syscall_handler_t) sys_sbrk,
+	[SYS_DUP] 	    =  (syscall_handler_t) sys_dup,
 };
 
 /**

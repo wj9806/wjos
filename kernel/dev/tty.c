@@ -76,15 +76,11 @@ int tty_open(device_t * dev)
     sem_init(&tty->isem, 0);
     
     tty->oflags = TTY_OCRLF;
+    tty->iflags = TTY_INCLR | TTY_IECHO;
     tty->console_idx = idx;
     keyboard_init();
     console_init(idx);
     return 0;
-}
-
-int tty_read(device_t * dev, int addr, char * buf, int size)
-{
-    return size;
 }
 
 int tty_write(device_t * dev, int addr, char * buf, int size)
@@ -130,6 +126,54 @@ int tty_write(device_t * dev, int addr, char * buf, int size)
     return len;
 }
 
+int tty_read(device_t * dev, int addr, char * buf, int size)
+{
+    if (size < 0)
+    {
+        return -1;
+    }
+    
+    tty_t * tty = get_tty(dev);
+    char * pbuf = buf;
+
+    int len = 0;
+    while (len < size)
+    {
+        sem_wait(&tty->isem);
+
+        char ch;
+        tty_fifo_get(&tty->ififo, &ch);
+        switch (ch)
+        {
+        case '\n':
+            if ((tty->iflags) && (len < size - 1))
+            {
+                *pbuf++='\r';
+                len++;
+            }
+            *pbuf++='\n';
+            len++;
+            break;
+        default:
+            *pbuf++=ch;
+            len++;
+            break;
+        }
+        if (tty->iflags & TTY_IECHO)
+        {
+            tty_write(dev, 0, &ch, 1);
+        }
+        
+        if ((ch == '\n') || (ch == '\r'))
+        {
+            break;
+        }
+        
+    }
+    
+    return len;
+}
+
 int tty_control(device_t * dev, int cmd, int arg0, int arg1)
 {
     return 0;
@@ -138,6 +182,18 @@ int tty_control(device_t * dev, int cmd, int arg0, int arg1)
 void tty_close(device_t * dev)
 {
     
+}
+
+void tty_in(int idx, char ch)
+{
+    tty_t * tty = tty_devs + idx;
+    if (sem_count(&tty->isem) >= TTY_IBUF_SIZE)
+    {
+        return;
+    }
+    tty_fifo_put(&tty->ififo, ch);
+
+    sem_notify(&tty->isem);
 }
 
 dev_desc_t dev_tty_desc = {

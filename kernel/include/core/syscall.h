@@ -18,6 +18,7 @@
 #define SYS_ISATTY                  55
 #define SYS_FSTAT                   56
 #define SYS_SBRK                    57
+#define SYS_DUP                     58
 
 #define SYS_PRINT_MSG               100
 

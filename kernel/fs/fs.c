@@ -125,7 +125,19 @@ int sys_read(int file, char * ptr, int len)
         temp_pos += len;
         return len;
     }
-    return -1;
+    else
+    {
+        //file = 0;
+
+        file_t * p_file = task_file(file);
+        if (!p_file)
+        {
+            log_printf("file not opened: %d", file);
+            return -1;
+        }
+        
+        return dev_read(p_file->dev_id, 0, ptr, len);
+    }
 }
 
 int sys_write(int file, char * ptr, int len)
@@ -134,7 +146,7 @@ int sys_write(int file, char * ptr, int len)
     file_t * p_file = task_file(file);
     if (!p_file)
     {
-        log_printf("file not opend: %d", file);
+        log_printf("file not opened: %d", file);
         return -1;
     }
     
@@ -170,4 +182,28 @@ int sys_fstat(int file, struct stat * st)
 void fs_init(void)
 {
     file_table_init();
+}
+
+int sys_dup(int file)
+{
+    if ((file < 0) || (file > TASK_OFILE_NR))
+    {
+        log_printf("file is invalid: %d", file);
+        return -1;
+    }
+    file_t * p_file = task_file(file);
+    if (!p_file)
+    {
+        log_printf("file not opened: %d", file);
+        return -1;
+    }
+    
+    int fd = task_alloc_fd(p_file);
+    if (fd >= 0)
+    {
+        p_file->ref++;
+        return fd;
+    }
+    log_printf("no task file avaliable");
+    return -1;
 }

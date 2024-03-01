@@ -48,4 +48,6 @@ int fstat(int file, struct stat * st);
 //错误返回-1
 void * sbrk(ptrdiff_t incr);
 
+int dup(int file);
+
 #endif

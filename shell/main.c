@@ -1,6 +1,8 @@
 #include "lib_syscall.h"
 #include <stdio.h>
 
+char cmd_buf[256];
+
 int main(int argc, char ** argv)
 {
     /**for (int i = 0; i < argc; i++)
@@ -31,13 +33,18 @@ int main(int argc, char ** argv)
     //清屏
     //printf("\033[2J\n");
 
-    open("tty:0", 0);
+    int fd = open("tty:0", 0); //stdin
+    dup(fd);                   //stdout
+    dup(fd);                   //stderr
 
     printf("hello shell\n");
     for(;;)
     {
-        printf("task id:%d\n", gettid());
-        yeild();
-        sleep(1000);
+        gets(cmd_buf);
+        puts(cmd_buf);
+
+        //printf("task id:%d\n", gettid());
+        //yeild();
+        //sleep(1000);
     }
 }
