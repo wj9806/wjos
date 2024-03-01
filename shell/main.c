@@ -33,7 +33,7 @@ int main(int argc, char ** argv)
     //清屏
     //printf("\033[2J\n");
 
-    int fd = open("tty:0", 0); //stdin
+    int fd = open(argv[0], 0); //stdin
     dup(fd);                   //stdout
     dup(fd);                   //stderr
 

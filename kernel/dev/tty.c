@@ -3,8 +3,11 @@
 #include "tools/log.h"
 #include "dev/console.h"
 #include "dev/keyboard.h"
+#include "cpu/irq.h"
 
 static tty_t tty_devs[TTY_NR];
+
+static int curr_tty = 0;
 
 static tty_t * get_tty(device_t * device)
 {
@@ -28,8 +31,10 @@ static void tty_fifo_init(tty_fifo_t * fifo, char * buf, int size)
 
 int tty_fifo_put(tty_fifo_t * fifo, char c)
 {
+    irq_state_t state = irq_enter_protection();
     if (fifo->count >= fifo->size)
     {
+        irq_leave_protection(state);
         return -1;
     }
     fifo->buf[fifo->write++] = c;
@@ -39,13 +44,16 @@ int tty_fifo_put(tty_fifo_t * fifo, char c)
         fifo->write = 0;
     }
     fifo->count++;
+    irq_leave_protection(state);
     return 0;
 }
 
 int tty_fifo_get(tty_fifo_t * fifo, char *c)
 {
+    irq_state_t state = irq_enter_protection();
     if (fifo->count <= 0)
     {
+        irq_leave_protection(state);
         return -1;
     }
     *c = fifo->buf[fifo->read++];
@@ -55,6 +63,7 @@ int tty_fifo_get(tty_fifo_t * fifo, char *c)
         fifo->read = 0;
     }
     fifo->count--;
+    irq_leave_protection(state);
     return 0;
 }
 
@@ -184,9 +193,19 @@ void tty_close(device_t * dev)
     
 }
 
-void tty_in(int idx, char ch)
+void tty_select(int tty)
 {
-    tty_t * tty = tty_devs + idx;
+    if (tty != curr_tty)
+    {
+        console_select(tty);
+        curr_tty = tty;
+    }
+    
+}
+
+void tty_in(char ch)
+{
+    tty_t * tty = tty_devs + curr_tty;
     if (sem_count(&tty->isem) >= TTY_IBUF_SIZE)
     {
         return;

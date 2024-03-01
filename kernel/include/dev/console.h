@@ -72,4 +72,5 @@ int console_write(tty_t * tty);
 
 int console_close(int console);
 
+int console_select(int idx);
 #endif

@@ -396,7 +396,7 @@ char * sys_sbrk(int incr)
     
     int incr_i = incr;
 
-    log_printf("pre_heap_end:0x%x", pre_heap_end);
+    //log_printf("pre_heap_end:0x%x", pre_heap_end);
     ASSERT(incr >= 0);
     if (incr == 0)
     {
