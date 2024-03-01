@@ -3,9 +3,8 @@
 #include "cpu/cpu.h"
 #include "cpu/irq.h"
 #include "dev/time.h"
-
+#include "fs/fs.h"
 #include "tools/log.h"
-#include "tools/list.h"
 #include "tools/klib.h"
 #include "os_cfg.h"
 #include "core/task.h"
@@ -23,7 +22,7 @@ void kernel_init (boot_info_t * boot_info)
     log_init();
     
     memory_init(boot_info);
-
+    fs_init();
     time_init();
     task_manager_init();
 

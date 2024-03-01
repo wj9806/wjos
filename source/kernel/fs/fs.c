@@ -1,4 +1,5 @@
 #include "fs/fs.h"
+#include "fs/file.h"
 #include "comm/types.h"
 #include "comm/elf.h"
 #include "comm/cpu_instr.h"
@@ -104,4 +105,9 @@ int sys_isatty(int file)
 int sys_fstat(int file, struct stat * st)
 {
     return -1;
+}
+
+void fs_init(void)
+{
+    file_table_init();
 }
