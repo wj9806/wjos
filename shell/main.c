@@ -3,7 +3,7 @@
 
 int main(int argc, char ** argv)
 {
-    for (int i = 0; i < argc; i++)
+    /**for (int i = 0; i < argc; i++)
     {
         printf("arg: %s\n", argv[i]);
     }
@@ -27,19 +27,16 @@ int main(int argc, char ** argv)
     printf("\033[10;10H test!\n");  // 定位到10, 10，test!
     printf("\033[20;20H test!\n");  // 定位到20, 20，test!
     printf("\033[32;25;39m123\n");  // ESC [pn m, Hello,world红色，其余绿色 
-
+    **/
     //清屏
     //printf("\033[2J\n");
 
+    open("tty:0", 0);
+
     printf("hello shell\n");
-    for (int i = 0; i < argc; i++)
-    {
-        printf("arg: %s\n", argv[i]);
-    }
-    fork();
     for(;;)
     {
-        //printf("task id:%d\n", gettid());
+        printf("task id:%d\n", gettid());
         yeild();
         sleep(1000);
     }

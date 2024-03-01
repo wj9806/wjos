@@ -4,12 +4,14 @@
 #include "comm/types.h"
 #include "cpu/cpu.h"
 #include "tools/list.h"
+#include "fs/file.h"
 
 #define TASK_NAME_SIZE                        32
 //期望每个任务执行100ms放弃时间片
 //因为时钟中断是10ms一次
 //所以10次节拍后放弃时间片
 #define TASK_TIME_SLICE_DEFAULT               (100/10)
+#define TASK_OFILE_NR                         128
 
 #define TASK_FLAGS_SYSTEM                     (1 << 0)
 
@@ -45,6 +47,7 @@ typedef struct _task_t
     int time_ticks;
     int slice_ticks;
 
+    file_t * file_table[TASK_OFILE_NR];
     char name[TASK_NAME_SIZE];
 
     node_t run_node;
@@ -59,6 +62,11 @@ typedef struct _task_t
 int task_init(task_t * task, const char * name, int flag, uint32_t entry, uint32_t esp);
 void task_uninit(task_t * task);
 void task_switch_from_to(task_t* from, task_t* to);
+
+//分配文件描述符
+int task_alloc_fd(file_t * file);
+void task_remove_fd(int fd);
+file_t * task_file(int fd);
 
 //任务管理器
 typedef struct _task_manager_t
