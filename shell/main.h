@@ -2,6 +2,7 @@
 #define __MAIN_H__
 
 #define CLI_INPUT_SIZE          1024
+#define CLI_MAX_ARG_COUNT       10
 
 typedef struct _cli_cmd_t
 {

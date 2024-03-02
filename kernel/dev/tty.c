@@ -154,19 +154,27 @@ int tty_read(device_t * dev, int addr, char * buf, int size)
         tty_fifo_get(&tty->ififo, &ch);
         switch (ch)
         {
-        case '\n':
-            if ((tty->iflags) && (len < size - 1))
-            {
-                *pbuf++='\r';
+            case 0x7f:
+                if (len == 0)
+                {
+                    continue;
+                }
+                len--;
+                pbuf--;
+                break;
+            case '\n':
+                if ((tty->iflags) && (len < size - 1))
+                {
+                    *pbuf++='\r';
+                    len++;
+                }
+                *pbuf++='\n';
                 len++;
-            }
-            *pbuf++='\n';
-            len++;
-            break;
-        default:
-            *pbuf++=ch;
-            len++;
-            break;
+                break;
+            default:
+                *pbuf++=ch;
+                len++;
+                break;
         }
         if (tty->iflags & TTY_IECHO)
         {
