@@ -22,12 +22,24 @@ static int do_help(int argc, char **argv)
     return 0;
 }
 
+static int do_clear(int argc, char ** argv)
+{
+    printf("%s", ESC_CLEAR_SCREEN);
+    printf("%s", ESC_MOVE_CURSOR(0, 0));
+    return 0;
+}
+
 static const cli_cmd_t cmd_list[] = {
     {
         .name = "help",
         .usage = "help -- list supported command",
         .do_func = do_help,
     },
+    {
+        .name = "clear",
+        .usage = "clear: clear screen",
+        .do_func = do_clear
+    }
 };
 
 static void cli_init(void)
@@ -65,7 +77,7 @@ static void run_builtin(const cli_cmd_t * cmd, int argc, char ** argv)
     int ret = cmd->do_func(argc, argv);
     if (ret < 0)
     {
-        fprintf(stderr, "error: %d\n", ret);
+        fprintf(stderr, ESC_COLOR_ERROR"error: %d\n"ESC_COLOR_DEFAULT, ret);
     }
     
 }
@@ -78,7 +90,6 @@ int main(int argc, char ** argv)
 
     cli_init();
 
-    puts("wjos start success!\n");
     for(;;)
     {
         show_prompt();
@@ -117,5 +128,7 @@ int main(int argc, char ** argv)
             continue;
         }
         //磁盘加载
+
+        fprintf(stderr, ESC_COLOR_ERROR"%s: command not found\n"ESC_COLOR_DEFAULT, cli.curr_input);
     }
 }

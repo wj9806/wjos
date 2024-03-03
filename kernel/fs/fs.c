@@ -142,7 +142,6 @@ int sys_read(int file, char * ptr, int len)
 
 int sys_write(int file, char * ptr, int len)
 {
-    file = 0;
     file_t * p_file = task_file(file);
     if (!p_file)
     {
