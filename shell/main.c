@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
+#include <sys/file.h>
 #include "main.h"
 #include "lib_syscall.h"
 
@@ -181,7 +182,7 @@ static void run_exec_file(const char * path, int argc, char ** argv)
 
 int main(int argc, char ** argv)
 {
-    int fd = open(argv[0], 0); //stdin
+    int fd = open(argv[0], O_RDWR); //stdin
     dup(fd);                   //stdout
     dup(fd);                   //stderr
 

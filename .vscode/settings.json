@@ -33,6 +33,7 @@
         "console.h": "c",
         "keyboard.h": "c",
         "dev.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "getopt.h": "c"
     },
 }
