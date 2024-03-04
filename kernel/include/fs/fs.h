@@ -38,6 +38,10 @@ typedef struct _fs_t
     mutex_t * mutex;
 } fs_t;
 
+int path_to_num(const char * path, int * num);
+
+const char * path_next_child(const char * path);
+
 void fs_init(void);
 
 int sys_open(const char * name, int flags, ...);

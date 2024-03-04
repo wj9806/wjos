@@ -12,7 +12,7 @@ typedef enum _file_type_t
     FILE_TTY = 1,
 } file_type_t;
 
-
+struct _fs_t;
 typedef struct _file_t
 {
     char file_name[FILE_NAME_SIZE];
@@ -25,6 +25,8 @@ typedef struct _file_t
     //当前读取的位置
     int pos;
     int mode;
+
+    struct _fs_t * fs;
 } file_t;
 
 file_t * file_alloc(void);

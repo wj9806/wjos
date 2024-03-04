@@ -3,6 +3,13 @@
 
 #include "fs/fs.h"
 
+typedef struct _devfs_type_t
+{
+    const char * name;
+    int dev_type;
+    int file_type;
+} devfs_type_t;
+
 int devfs_mount(struct _fs_t * fs, int major, int minor);
 
 void devfs_unmount(struct _fs_t * fs);
