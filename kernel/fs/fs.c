@@ -10,9 +10,18 @@
 #include "dev/dev.h"
 #include "core/task.h"
 
+#define FS_TABLE_SIZE            8
+#define TEMP_FILE_ID             100
+
+static list_t mounted_list;
+static fs_t fs_table[FS_TABLE_SIZE];
+static list_t free_list;
+
+extern fs_op_t devfs_op;
+
 static uint8_t TEMP_ADDR[100*1024];
 static uint8_t * temp_pos;
-#define TEMP_FILE_ID             100
+
 
 static void read_disk(int sector, int sector_count, uint8_t * buf)
 {
@@ -178,9 +187,87 @@ int sys_fstat(int file, struct stat * st)
     return -1;
 }
 
+static void mount_list_init(void)
+{
+    list_init(&free_list);
+    for (int i = 0; i < FS_TABLE_SIZE; i++)
+    {
+        list_insert_first(&free_list, &fs_table[i].node);
+    }
+    list_init(&mounted_list);
+}
+
+static fs_op_t * get_fs_op(fs_type_t type, int major)
+{
+    switch (type)
+    {
+    case FS_DEVFS:
+        return &(devfs_op);
+    default:
+        return (fs_op_t *)0;
+    }
+}
+
+static fs_t * mount(fs_type_t type, char * mount_point, int dev_major, int dev_minor)
+{
+    fs_t * fs = (fs_t *)0;
+    log_printf("start mount file system, name: %s, dev: %x", mount_point, dev_major);
+
+    node_t * curr = list_first(&mounted_list);
+    while (curr)
+    {
+        fs_t * fs = list_node_parent(curr, fs_t, node);
+        //判断是否已经存在了
+        if (kernel_strcmp(fs->mount_point, mount_point, FS_MOUNT_SIZE) == 0)
+        {
+            log_printf("fs already mounted");
+            goto mount_failed;
+        }
+        curr = list_node_next(curr);
+    }
+    
+    node_t * free_node = list_remove_first(&free_list);
+    if (!free_node)
+    {
+        log_printf("no free fs, mount failed");
+        goto mount_failed;
+    }
+
+    fs = list_node_parent(free_node, fs_t, node);
+    fs_op_t * op = get_fs_op(type, dev_major);
+    if (!op)
+    {
+        log_printf("unsupported fs type: %d", type);
+        goto mount_failed;
+    }
+    kernel_memset(fs, 0, sizeof(fs_t));
+    kernel_strncpy(fs->mount_point, mount_point, FS_MOUNT_SIZE);
+    fs->op = op;
+    if (fs->op->mount(fs, dev_major, dev_minor) < 0)
+    {
+        log_printf("fs mount failed, name: %s, dev: %x", mount_point, dev_major);
+        goto mount_failed;
+    }
+    
+    list_insert_last(&mounted_list, &fs->node);
+
+    return fs;
+mount_failed:
+    if (fs)
+    {
+        list_insert_last(&free_list, &fs->node);
+    }
+    
+    return (fs_t *) 0;
+}
+
 void fs_init(void)
 {
+    mount_list_init();
     file_table_init();
+
+    fs_t * fs = mount(FS_DEVFS, "/dev", 0, 0);
+    ASSERT(fs != (fs_t *)0);
 }
 
 int sys_dup(int file)
