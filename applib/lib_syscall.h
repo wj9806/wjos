@@ -17,7 +17,7 @@ typedef struct _syscall_args_t
 
 void sleep(int ms);
 
-int gettid(void);
+int getpid(void);
 
 void print_msg(const char * fmt, int arg);
 
@@ -49,5 +49,9 @@ int fstat(int file, struct stat * st);
 void * sbrk(ptrdiff_t incr);
 
 int dup(int file);
+
+void _exit(int status);
+
+int wait(int * status);
 
 #endif

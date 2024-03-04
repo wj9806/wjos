@@ -91,6 +91,7 @@ int task_init(task_t * task, const char * name, int flag, uint32_t entry, uint32
     task->heap_end = 0;
     task->time_ticks = TASK_TIME_SLICE_DEFAULT;
     task->slice_ticks = task->time_ticks;
+    task->status = 0;
     node_init(&task->all_node);
     node_init(&task->run_node);
     node_init(&task->wait_node);
@@ -344,7 +345,7 @@ void sys_sleep(uint32_t ms)
     irq_leave_protection(state);
 }
 
-int sys_gettid(void)
+int sys_getpid(void)
 {
     task_t * task = task_current();
 
@@ -375,6 +376,21 @@ static void free_task(task_t * task)
     mutex_unlock(&task_table_mutex);
 }
 
+//复制父进程已经打开的文件
+static void copy_opened_files(task_t * child_task)
+{
+    task_t * parent = task_current();
+    for (int fd = 0; fd < TASK_OFILE_NR; fd++)
+    {
+        file_t * file = parent->file_table[fd];
+        if (file)
+        {
+            file_inc_ref(file);
+            child_task->file_table[fd] = file;
+        }
+    }
+}
+
 //父进程调用返回子进程的id
 //子进程调用返回0
 //fork后子进程和父进程不共用同一块数据
@@ -394,6 +410,7 @@ int sys_fork(void)
     {
         goto fork_failed;
     }
+    copy_opened_files(child_task);
     
     tss_t * tss = &child_task->tss;
     //子进程从eax中获取返回值
@@ -635,4 +652,100 @@ file_t * task_file(int fd)
     }
     
     return (file_t *)0;
+}
+
+int sys_wait(int * status)
+{
+    task_t * curr_task = task_current();
+    for(;;)
+    {
+        mutex_lock(&task_table_mutex);
+        for (int i = 0; i < TASK_NR; i++)
+        {
+            task_t * task = task_table + i;
+            if (task->parent != curr_task)
+            {
+                continue;
+            }
+            if (task->state == TASK_ZOMBIE)
+            {
+                //父进程释放子进程开辟的资源
+                int pid = task->tid;
+                *status = task->status;
+                memory_destroy_uvm(task->tss.cr3);
+                memory_free_page(task->tss.esp0 - MEM_PAGE_SIZE);
+                kernel_memset(task, 0, sizeof(task_t));
+                mutex_unlock(&task_table_mutex);
+                return pid;
+            }
+        }
+        mutex_unlock(&task_table_mutex);
+
+        irq_state_t state = irq_enter_protection();
+        task_set_block(curr_task);
+        //等待子进程退出
+        curr_task->state = TASK_WAITTING;
+        task_dispatch();
+        irq_leave_protection(state);
+    }
+
+    return 0;
+}
+
+void sys_exit(int status)
+{
+    task_t * curr_task = task_current();
+
+    for (int fd = 0; fd < TASK_OFILE_NR; fd++)
+    {
+        file_t * file = curr_task->file_table[fd];
+        if (file)
+        {
+            sys_close(fd);
+            curr_task->file_table[fd] = (file_t *)0;
+        }
+    }    
+
+    int move_child = 0;
+    mutex_lock(&task_table_mutex);
+    for (int i = 0; i < TASK_NR; i++)
+    {
+        task_t * task = task_table + i;
+        if (task->parent == curr_task)
+        {   
+            //把自己的子进程转交给first_task
+            //用于解决子进程释放后，子进程的子进程无法释放问题
+            task->parent = &task_manager.first_task;
+            if (task->state == TASK_ZOMBIE)
+            {
+                move_child = 1;
+            }
+            
+        }
+    }
+    mutex_unlock(&task_table_mutex);
+
+    irq_state_t state = irq_enter_protection();
+    task_t * parent = curr_task->parent;
+    if (move_child && (parent != &task_manager.first_task))
+    {
+        if (task_manager.first_task.state == TASK_WAITTING)
+        {
+            task_set_ready(&task_manager.first_task);
+        }
+        
+    }
+
+    if (parent->state == TASK_WAITTING)
+    {
+        //唤醒父进程
+        task_set_ready(curr_task->parent);
+    }
+
+    curr_task->state = TASK_ZOMBIE;
+    curr_task->status = status;
+    
+    task_set_block(curr_task);
+    task_dispatch();
+    irq_leave_protection(state);
 }

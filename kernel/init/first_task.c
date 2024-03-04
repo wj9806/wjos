@@ -7,7 +7,7 @@ int first_task_main(void)
     
     int count = 0;
 #if 0
-    int tid = gettid();
+    int tid = getpid();
     print_msg("task id=%d", tid);
 
     //创建子进程
@@ -49,9 +49,10 @@ int first_task_main(void)
 
     for(;;)
     {
-        sleep(1000);
-        //print_msg("for task id=%d", tid);
-        //print_msg("count=%d", count);
+        //sleep(1000);
+        
+        int status;
+        wait(&status);
     }
 
     return 0;

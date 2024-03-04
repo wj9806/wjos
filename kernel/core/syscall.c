@@ -13,11 +13,13 @@ void sys_print_msg(const char * fmt, int arg)
 
 static const syscall_handler_t  sys_table[] = {
     [SYS_SLEEP] 	=  (syscall_handler_t) sys_sleep,
-	[SYS_GETTID] 	=  (syscall_handler_t) sys_gettid,
+	[SYS_GETPID] 	=  (syscall_handler_t) sys_getpid,
 	[SYS_FORK] 	    =  (syscall_handler_t) sys_fork,
 	[SYS_PRINT_MSG] =  (syscall_handler_t) sys_print_msg,
 	[SYS_EXECVE]    =  (syscall_handler_t) sys_execve,
 	[SYS_YEILD]     =  (syscall_handler_t) sys_yeild,
+	[SYS_EXIT]		=  (syscall_handler_t) sys_exit,
+	[SYS_WAIT]		=  (syscall_handler_t) sys_wait,
   
 	[SYS_OPEN] 		=  (syscall_handler_t) sys_open,
 	[SYS_READ] 		=  (syscall_handler_t) sys_read,

@@ -35,10 +35,10 @@ void sleep(int ms)
     sys_call(&args);
 }
 
-int gettid(void)
+int getpid(void)
 {
     syscall_args_t args;
-    args.id = SYS_GETTID;
+    args.id = SYS_GETPID;
 
     return sys_call(&args);
 }
@@ -162,5 +162,24 @@ int dup(int file)
     syscall_args_t args;
     args.id = SYS_DUP;
     args.arg0 = file;
+    return sys_call(&args);
+}
+
+void _exit(int status)
+{
+    syscall_args_t args;
+    args.id = SYS_EXIT;
+    args.arg0 = status;
+    sys_call(&args);
+
+    //warning: ‘noreturn’ function does return
+    for(;;){}
+}
+
+int wait(int * status)
+{
+    syscall_args_t args;
+    args.id = SYS_WAIT;
+    args.arg0 = (int) status;
     return sys_call(&args);
 }

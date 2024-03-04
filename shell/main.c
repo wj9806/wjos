@@ -7,7 +7,6 @@
 
 char cmd_buf[256];
 
-
 static cli_t cli;
 static const char * prompt = "[root@localhost ~] # ";
 
@@ -86,6 +85,12 @@ static int do_echo(int argc, char ** argv)
     return 0;
 }
 
+static int do_exit(int argc, char ** argv)
+{
+    exit(0);
+    return 0;
+}
+
 static const cli_cmd_t cmd_list[] = {
     {
         .name = "help",
@@ -101,6 +106,12 @@ static const cli_cmd_t cmd_list[] = {
         .name = "echo",
         .usage = "echo [-n count] msg",
         .do_func = do_echo
+    },
+    {
+        .name = "exit",
+        .usage = "exit from shell",
+        .do_func = do_exit
+
     }
 };
 
@@ -142,6 +153,30 @@ static void run_builtin(const cli_cmd_t * cmd, int argc, char ** argv)
         fprintf(stderr, ESC_COLOR_ERROR"error: %d\n"ESC_COLOR_DEFAULT, ret);
     }
     
+}
+
+static void run_exec_file(const char * path, int argc, char ** argv)
+{
+    int pid = fork();
+        if (pid < 0)
+        {
+            fprintf(stderr, "fork failed %s", path);
+        }
+        else if (pid == 0)
+        {   
+            for (int i = 0; i < argc; i++)
+            {
+                printf("arg %s\n", argv[i]);
+            }
+            exit(-1);
+        }
+        else
+        {
+            int status;
+            //wait函数等待子进程的退出
+            int pid = wait(&status);
+            fprintf(stderr, "cmd %s result = %d, pid = %d\n", path, status, pid);
+        }
 }
 
 int main(int argc, char ** argv)
@@ -189,7 +224,9 @@ int main(int argc, char ** argv)
             run_builtin(cmd, argc, argv);
             continue;
         }
+
         //磁盘加载
+        run_exec_file("", argc, argv);
 
         fprintf(stderr, ESC_COLOR_ERROR"%s: command not found\n"ESC_COLOR_DEFAULT, cli.curr_input);
     }

@@ -4,10 +4,12 @@
 #include "comm/types.h"
 
 #define SYS_SLEEP                   0
-#define SYS_GETTID                  1
+#define SYS_GETPID                  1
 #define SYS_EXECVE                  2
 #define SYS_FORK                    3
 #define SYS_YEILD                   4
+#define SYS_EXIT                    5
+#define SYS_WAIT                    6
 
 #define SYS_OPEN                    50
 #define SYS_READ                    51

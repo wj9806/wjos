@@ -177,7 +177,7 @@ int console_init(int idx)
     console->old_cursor_row = console->cursor_row;
     console->old_cursor_col = console->cursor_col;
     console->write_state = CONSOLE_WRITE_NORMAL;
-   
+    mutex_init(&console->mutex);
     return 0;
 }
 
@@ -362,6 +362,7 @@ int console_write(tty_t * tty)
 {
     console_t * c = console_buf + tty->console_idx;
     int len = 0;
+    mutex_lock(&c->mutex);
     do
     {
         char ch;
@@ -389,7 +390,7 @@ int console_write(tty_t * tty)
         }
         len++;
     } while (1);
-
+    mutex_unlock(&c->mutex);
     if (tty->console_idx == curr_console_idx)
     {
         update_cursor_pos(c);
