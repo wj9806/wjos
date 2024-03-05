@@ -6,6 +6,7 @@
 enum {
     DEV_UNKNOWN = 0,
     DEV_TTY = 1,
+    DEV_DISK = 2
 };
 
 struct _dev_desc_t;

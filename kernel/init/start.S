@@ -92,6 +92,7 @@ exception_handler control_exception, 21, 0
 
 exception_handler time, 0x20, 0
 exception_handler keyboard, 0x21, 0
+exception_handler ide_primary, 0x2E, 0
 
     # simple_switch(&from, to)
     .text

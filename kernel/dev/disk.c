@@ -1,9 +1,14 @@
 #include "dev/disk.h"
+#include "dev/dev.h"
 #include "comm/cpu_instr.h"
+#include "cpu/irq.h"
 #include "tools/log.h"
 #include "tools/klib.h"
 
+static mutex_t mutex;
+static sem_t op_sem;
 static disk_t disk_buf[DISK_CNT];
+static int task_on_op;
 
 static void disk_send_cmd(disk_t * disk, uint32_t start_sector, uint32_t sector_count, int cmd)
 {
@@ -146,7 +151,8 @@ static int identify_disk(disk_t * disk)
 void disk_init(void)
 {
     log_printf("disk start init..");
-
+    mutex_init(&mutex);
+    sem_init(&op_sem, 0);
     kernel_memset(disk_buf, 0, sizeof(disk_buf));
     for (int i = 0; i < DISK_PER_CHANNEL; i++)
     {
@@ -154,6 +160,8 @@ void disk_init(void)
         kernel_sprintf(disk->name, "sd%c", i + 'a');
         disk->drive = (i == 0) ? DISK_MASTER : DISK_SLAVE;
         disk->port_base = IOBASE_PRIMARY;
+        disk->mutex = &mutex;
+        disk->op_sem = &op_sem;
 
         int err = identify_disk(disk);
         if (err == 0)
@@ -164,3 +172,121 @@ void disk_init(void)
     }
     
 }
+
+int disk_open(device_t * dev)
+{
+    int disk_idx = (dev->minor >> 4) - 0xa;
+    int part_idx = dev->minor & 0xF;
+    if ((disk_idx >= DISK_CNT) || (part_idx >= DISK_PRIMARY_PART_CNT)) {
+        log_printf("device minor error: %d", dev->minor);
+        return -1;
+    }
+
+    disk_t * disk = disk_buf + disk_idx;
+    if (disk->sector_size == 0) {
+        log_printf("disk not exist. device:sd%x", dev->minor);
+        return -1;
+    }
+
+    partinfo_t * part_info = disk->partinfo + part_idx;
+    if (part_info->total_sector == 0) {
+        log_printf("part not exist. device:sd%x", dev->minor);
+        return -1;
+    }
+
+    dev->data = part_info;
+    irq_install(IRQ14_HARDDISK_PRIMARY, (irq_handle_t)exception_handler_ide_primary);
+    irq_enable(IRQ14_HARDDISK_PRIMARY);
+    return 0;
+}
+
+int disk_read(device_t * dev, int addr, char * buf, int size)
+{
+    partinfo_t * part_info = (partinfo_t *) dev->data;
+    disk_t * disk = part_info->disk;
+    if (disk == (disk_t *)0)
+    {
+        log_printf("no disk device: %d", dev->minor);
+        return -1;
+    }
+    mutex_lock(disk->mutex);
+    task_on_op = 1;
+    disk_send_cmd(disk, part_info->start_sector + addr, size, DISK_CMD_READ);
+    int count;
+    for (count = 0; count < size; count++, buf+=disk->sector_size)
+    {
+        sem_wait(disk->op_sem);
+        int err = disk_wait_data(disk);
+        if (err < 0)
+        {
+            log_printf("disk(%s) read error: start sector %d, count %d", disk->name, addr, size);
+            break;
+        }
+        disk_read_datas(disk, buf, disk->sector_size);
+    }
+    mutex_unlock(disk->mutex);
+    return count;
+}
+
+int disk_write(device_t * dev, int addr, char * buf, int size)
+{
+    // 取分区信息
+    partinfo_t * part_info = (partinfo_t *)dev->data;
+    if (!part_info) {
+        log_printf("Get part info failed! device = %d", dev->minor);
+        return -1;
+    }
+
+    disk_t * disk = part_info->disk;
+    if (disk == (disk_t *)0) {
+        log_printf("No disk for device %d", dev->minor);
+        return -1;
+    }
+
+    mutex_lock(disk->mutex);
+    task_on_op = 1;
+    int count;
+    for (count = 0; count < size; count++, buf += disk->sector_size) {
+        disk_write_datas(disk, buf, disk->sector_size);
+
+        sem_wait(disk->op_sem);
+        int err = disk_wait_data(disk);
+        if (err < 0) {
+            log_printf("disk(%s) write error: start sect %d, count %d", disk->name, addr, size);
+            break;
+        }
+    }
+
+    mutex_unlock(disk->mutex);
+    return count;
+}
+
+int disk_control(device_t * dev, int cmd, int arg0, int arg1)
+{
+    return -1;
+}
+
+void disk_close(device_t * dev)
+{
+
+}
+
+void do_handle_ide_primary(exception_frame_t * frame)
+{
+    pic_send_eoi(IRQ14_HARDDISK_PRIMARY);
+    if (task_on_op == 1)
+    {
+        //通知进程数据准备就绪
+        sem_notify(&op_sem);
+    }
+}
+
+dev_desc_t dev_disk_desc = {
+    .name = "disk",
+    .major = DEV_DISK,
+    .open = disk_open,
+    .read = disk_read,
+    .write = disk_write,
+    .control = disk_control,
+    .close = disk_close,
+};
