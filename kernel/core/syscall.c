@@ -31,6 +31,10 @@ static const syscall_handler_t  sys_table[] = {
 	[SYS_FSTAT] 	=  (syscall_handler_t) sys_fstat,
 	[SYS_SBRK] 	    =  (syscall_handler_t) sys_sbrk,
 	[SYS_DUP] 	    =  (syscall_handler_t) sys_dup,
+
+	[SYS_OPENDIR] 	=  (syscall_handler_t) sys_opendir,
+	[SYS_READDIR] 	=  (syscall_handler_t) sys_readdir,
+	[SYS_CLOSEDIR] 	    =  (syscall_handler_t) sys_closedir,
 };
 
 /**

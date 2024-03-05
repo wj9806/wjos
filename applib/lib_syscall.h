@@ -15,6 +15,23 @@ typedef struct _syscall_args_t
     int arg3;
 } syscall_args_t;
 
+struct dirent
+{
+    int index;
+    int type;
+    char name[255];
+    int size;
+};
+
+
+typedef struct _DIR
+{
+    int index;
+    struct dirent dirent;
+    
+} DIR;
+
+
 void sleep(int ms);
 
 int getpid(void);
@@ -53,5 +70,11 @@ int dup(int file);
 void _exit(int status);
 
 int wait(int * status);
+
+DIR * opendir(const char * path);
+
+struct dirent * readdir(DIR * dir);
+
+int closedir(DIR * dir);
 
 #endif

@@ -36,6 +36,7 @@
         "stdlib.h": "c",
         "getopt.h": "c",
         "fatfs.h": "c",
-        "file.h": "c"
+        "file.h": "c",
+        "fs.h": "c"
     },
 }

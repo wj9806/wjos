@@ -1,6 +1,7 @@
 #include "lib_syscall.h"
 #include "os_cfg.h"
 #include "core/syscall.h"
+#include <stdlib.h>
 
 static inline int sys_call(syscall_args_t* args)
 {
@@ -182,4 +183,48 @@ int wait(int * status)
     args.id = SYS_WAIT;
     args.arg0 = (int) status;
     return sys_call(&args);
+}
+
+DIR * opendir(const char * path)
+{
+    DIR * dir = (DIR *) malloc(sizeof(DIR)); 
+    if (dir == (DIR *)0)
+    {
+        return dir;
+    }
+    syscall_args_t args;
+    args.id = SYS_OPENDIR;
+    args.arg0 = (int) path;
+    args.arg1 = (int) dir;
+    int err = sys_call(&args);
+    if (err < 0)
+    {
+        free(dir);
+        return (DIR *)0;
+    }
+    return dir;
+}
+
+struct dirent * readdir(DIR * dir)
+{
+    syscall_args_t args;
+    args.id = SYS_READDIR;
+    args.arg0 = (int) dir;
+    args.arg1 = (int) &dir->dirent;
+    int err = sys_call(&args);
+    if (err < 0)
+    {
+        return (struct dirent *)0;
+    }
+    return &dir->dirent;
+}
+
+int closedir(DIR * dir)
+{
+    syscall_args_t args;
+    args.id = SYS_CLOSEDIR;
+    args.arg0 = (int) dir;
+    sys_call(&args);
+    free(dir);
+    return 0;
 }

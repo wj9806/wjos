@@ -5,6 +5,7 @@
 #include <sys/file.h>
 #include "main.h"
 #include "lib_syscall.h"
+#include "fs/file.h"
 
 char cmd_buf[256];
 
@@ -43,6 +44,7 @@ static int do_echo(int argc, char ** argv)
     
     int count = 1;
     int ch;
+    int n = 0;
     while ((ch = getopt(argc, argv, "n:h")) != -1)
     {
         switch (ch)
@@ -57,6 +59,7 @@ static int do_echo(int argc, char ** argv)
             case 'n':
                 //atoi 把字符串转换成整型数。
                 count = atoi(optarg);
+                n = 1;
                 break;
             case '?':
                 if (optarg)
@@ -76,12 +79,25 @@ static int do_echo(int argc, char ** argv)
         optind = 1;
         return -1;
     }
+
+    if (n == 1)
+    {
         // 循环打印消息
-    char * msg = argv[optind];
-    for (int i = 0; i < count; i++) {
-        
-        puts(msg);
+        char * msg = argv[optind];
+        for (int i = 0; i < count; i++) {
+            puts(msg);
+        }
     }
+    else
+    {
+        for (int i = 1; i < argc; i++)
+        {
+            printf(argv[i], "");
+            printf(" ");
+        }
+        printf("\n");
+    }
+
     optind = 1;
     return 0;
 }
@@ -89,6 +105,26 @@ static int do_echo(int argc, char ** argv)
 static int do_exit(int argc, char ** argv)
 {
     exit(0);
+    return 0;
+}
+
+static int do_ls(int argc, char ** argv)
+{
+    DIR * p_dir = opendir("temp");
+    if (p_dir == NULL)
+    {
+        printf("open dir failed.\n");
+        return -1;
+    }
+    struct dirent * entry;
+    while ((entry = readdir(p_dir)) != NULL)
+    {
+        printf("%c %s %d\n", 
+            entry->type = FILE_DIR ? 'd' : 'f', 
+            entry->name, 
+            entry->size);
+    }
+    closedir(p_dir);
     return 0;
 }
 
@@ -113,6 +149,11 @@ static const cli_cmd_t cmd_list[] = {
         .usage = "exit from shell",
         .do_func = do_exit
 
+    },
+    {
+        .name = "ls",
+        .usage = "list directory",
+        .do_func = do_ls
     }
 };
 

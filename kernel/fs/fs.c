@@ -425,3 +425,27 @@ int sys_dup(int file)
     log_printf("no task file avaliable");
     return -1;
 }
+
+int sys_opendir(const char * name, DIR * dir)
+{
+    fs_protect(root_fs);
+    int err = root_fs->op->opendir(root_fs, name, dir);
+    fs_unprotect(root_fs);
+    return err;
+}
+
+int sys_readdir(DIR * dir, struct dirent * dirent)
+{
+    fs_protect(root_fs);
+    int err = root_fs->op->readdir(root_fs, dir, dirent);
+    fs_unprotect(root_fs);
+    return err;
+}
+
+int sys_closedir(DIR * dir)
+{
+    fs_protect(root_fs);
+    int err = root_fs->op->closedir(root_fs, dir);
+    fs_unprotect(root_fs);
+    return err;
+}
