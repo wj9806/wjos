@@ -215,7 +215,11 @@ int disk_read(device_t * dev, int addr, char * buf, int size)
     int count;
     for (count = 0; count < size; count++, buf+=disk->sector_size)
     {
-        sem_wait(disk->op_sem);
+        if (task_current())
+        {
+            sem_wait(disk->op_sem);
+        }
+    
         int err = disk_wait_data(disk);
         if (err < 0)
         {
@@ -249,7 +253,11 @@ int disk_write(device_t * dev, int addr, char * buf, int size)
     for (count = 0; count < size; count++, buf += disk->sector_size) {
         disk_write_datas(disk, buf, disk->sector_size);
 
-        sem_wait(disk->op_sem);
+        if (task_current())
+        {
+            sem_wait(disk->op_sem);
+        }
+        
         int err = disk_wait_data(disk);
         if (err < 0) {
             log_printf("disk(%s) write error: start sect %d, count %d", disk->name, addr, size);

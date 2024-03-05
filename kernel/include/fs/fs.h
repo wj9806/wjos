@@ -5,6 +5,8 @@
 #include "fs/file.h"
 #include "tools/list.h"
 #include "ipc/mutex.h"
+#include "os_cfg.h"
+#include "fs/fatfs/fatfs.h"
 
 #define FS_MOUNT_SIZE           512
 
@@ -25,6 +27,7 @@ typedef struct _fs_op_t
 typedef enum _fs_type_t
 {
     FS_DEVFS,
+    FS_FATFS16,
 } fs_type_t;
 
 typedef struct _fs_t 
@@ -36,6 +39,11 @@ typedef struct _fs_t
     int dev_id;
     node_t node;
     mutex_t * mutex;
+    union
+    {
+        fat_t fat_data;
+    };
+    
 } fs_t;
 
 int path_to_num(const char * path, int * num);

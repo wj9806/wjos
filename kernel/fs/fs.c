@@ -20,6 +20,9 @@ static fs_t fs_table[FS_TABLE_SIZE];
 static list_t free_list;
 
 extern fs_op_t devfs_op;
+extern fs_op_t fatfs_op;
+
+static fs_t * root_fs;
 
 static uint8_t TEMP_ADDR[100*1024];
 static uint8_t * temp_pos;
@@ -132,7 +135,7 @@ int sys_open(const char * name, int flags, ...)
     }
     else
     {
-
+        fs = root_fs;
     }
     
     file->mode = flags;
@@ -326,6 +329,8 @@ static fs_op_t * get_fs_op(fs_type_t type, int major)
     {
     case FS_DEVFS:
         return &(devfs_op);
+    case FS_FATFS16:
+        return &(fatfs_op);
     default:
         return (fs_op_t *)0;
     }
@@ -392,6 +397,9 @@ void fs_init(void)
     
     fs_t * fs = mount(FS_DEVFS, "/dev", 0, 0);
     ASSERT(fs != (fs_t *)0);
+
+    root_fs = mount(FS_FATFS16, "/home", ROOT_DEV);
+    ASSERT(root_fs != (fs_t *)0);
 }
 
 int sys_dup(int file)
