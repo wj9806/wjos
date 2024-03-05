@@ -10,6 +10,7 @@
 #define DISK_CNT                    2
 #define DISK_PER_CHANNEL            2
 #define IOBASE_PRIMARY              0x1F0
+#define MBR_PRIMARY_PART_NR         4
 
 #define DISK_DATA(disk)             (disk->port_base + 0)       // 数据寄存器
 #define DISK_ERROR(disk)            (disk->port_base + 1)       // 错误寄存器
@@ -33,6 +34,33 @@
 #define	DISK_CMD_IDENTIFY			0xEC	// IDENTIFY命令
 #define	DISK_CMD_READ				0x24	// 读命令
 #define	DISK_CMD_WRITE				0x34	// 写命令
+
+//禁止内存对齐
+#pragma pack(1) 
+/**
+ * MBR的分区表项类型
+ */
+typedef struct _part_item_t {
+    uint8_t boot_active;               // 分区是否活动
+	uint8_t start_header;              // 起始header
+	uint16_t start_sector : 6;         // 起始扇区
+	uint16_t start_cylinder : 10;	    // 起始磁道
+	uint8_t system_id;	                // 文件系统类型
+	uint8_t end_header;                // 结束header
+	uint16_t end_sector : 6;           // 结束扇区
+	uint16_t end_cylinder : 10;        // 结束磁道
+	uint32_t relative_sectors;	        // 相对于该驱动器开始的相对扇区数
+	uint32_t total_sectors;            // 总的扇区数
+}part_item_t;
+
+typedef struct _mbr_t
+{
+    uint8_t code[446];
+    part_item_t part_item[MBR_PRIMARY_PART_NR];
+    uint8_t boot_sig[2];
+
+} mbr_t;
+#pragma pack()
 
 struct _disk_t;
 typedef struct _partinfo_t

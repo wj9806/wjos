@@ -52,6 +52,16 @@ static void print_disk_info(disk_t * disk)
     log_printf("%s:", disk->name);
     log_printf("  port_base: %x", disk->port_base);
     log_printf("  total_size: %d m", disk->sector_count * disk->sector_size / 1024 / 1024);
+        // 显示分区信息
+    log_printf("  Part info:");
+    for (int i = 0; i < DISK_PRIMARY_PART_CNT; i++) {
+        partinfo_t * part_info = disk->partinfo + i;
+        if (part_info->type != FS_INVALID) {
+            log_printf("    %s: type: %x, start sector: %d, count %d",
+                    part_info->name, part_info->type,
+                    part_info->start_sector, part_info->total_sector);
+        }
+    }
 }
 
 static int disk_wait_data (disk_t * disk)
@@ -68,6 +78,38 @@ static int disk_wait_data (disk_t * disk)
     } while (1);
     
     return (status & DISK_STATUS_ERR) ? -1 : 0;
+}
+
+static int detect_part_info(disk_t * disk)
+{
+    mbr_t mbr;
+    disk_send_cmd(disk, 0, 1, DISK_CMD_READ);
+    int err = disk_wait_data(disk);
+    if (err < 0)
+    {
+        log_printf("read mbr failed");
+        return err;
+    }
+    
+    disk_read_datas(disk, &mbr, sizeof(mbr));
+    part_item_t * item = mbr.part_item;
+    partinfo_t * part_info = disk->partinfo + 1;
+    for (int i = 0; i < MBR_PRIMARY_PART_NR; i++, item++, part_info++)
+    {
+        part_info->type = item->system_id;
+        if (part_info->type == FS_INVALID)
+        {
+            part_info->total_sector = part_info->start_sector = 0;
+            part_info->disk = (disk_t *) 0;
+        }
+        else
+        {
+            kernel_sprintf(part_info->name, "%s%d", disk->name, i + 1);
+            part_info->start_sector = item->relative_sectors;
+            part_info->total_sector = item->total_sectors;
+            part_info->disk = disk;
+        }
+    }
 }
 
 static int identify_disk(disk_t * disk)
@@ -89,7 +131,16 @@ static int identify_disk(disk_t * disk)
     disk_read_datas(disk, buf, sizeof(buf));
     disk->sector_count = *(uint32_t *) (buf + 100);
     disk->sector_size = SECTOR_SIZE;
-    return err;
+
+    partinfo_t * part = disk->partinfo + 0;
+    part->disk = disk;
+    kernel_sprintf(part->name, "%s%d", disk->name, 0);
+    part->start_sector = 0;
+    part->total_sector = disk->sector_count;
+    part->type = FS_INVALID;
+
+    detect_part_info(disk);
+    return 0;
 }
 
 void disk_init(void)
