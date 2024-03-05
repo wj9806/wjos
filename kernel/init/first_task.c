@@ -3,7 +3,7 @@
 
 int first_task_main(void)
 {
-    print_msg("wjos start success!", 0);
+    print_msg("welcome to wjos", 0);
     
     int count = 0;
 #if 0

@@ -119,6 +119,11 @@ static inline uint16_t inw (uint16_t port)
     return rv;
 }
 
+static inline void outw (uint16_t port, uint16_t data)
+{
+    __asm__ __volatile__("out %[v], %[p]"::[p]"d"(port), [v]"a"(data));
+}
+
 //hlt指令 cpu暂停运行
 static inline void hlt()
 {
