@@ -9,6 +9,7 @@
 #define TTY_OCRLF       (1<<0)
 #define TTY_INCLR       (1<<0)
 #define TTY_IECHO       (1<<1)
+#define TTY_CMD_ECHO    0x1
 
 /**
  * buf

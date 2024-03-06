@@ -21,6 +21,7 @@
 #define SYS_FSTAT                   56
 #define SYS_SBRK                    57
 #define SYS_DUP                     58
+#define SYS_IOCTL                   59
 
 #define SYS_OPENDIR                 60
 #define SYS_READDIR                 61

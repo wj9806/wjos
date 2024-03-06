@@ -91,4 +91,6 @@ typedef struct _fat_t {
     mutex_t mutex;                          // 互斥信号量
 } fat_t;
 
+typedef uint16_t cluster_t;
+
 #endif

@@ -57,6 +57,8 @@ int lseek(int file, int ptr, int dir);
 
 int isatty(int file);
 
+int ioctl(int file, int cmd, int arg0, int arg1);
+
 int fstat(int file, struct stat * st);
 
 //用于增长应用程序的数据空间increment字节

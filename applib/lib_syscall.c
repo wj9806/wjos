@@ -140,6 +140,18 @@ int isatty(int file)
     return sys_call(&args);
 }
 
+int ioctl(int file, int cmd, int arg0, int arg1)
+{
+    syscall_args_t args;
+    args.id = SYS_IOCTL;
+    args.arg0 = file;
+    args.arg1 = cmd;
+    args.arg2 = arg0;
+    args.arg3 = arg1;
+
+    return sys_call(&args);
+}
+
 int fstat(int file, struct stat * st)
 {
     syscall_args_t args;

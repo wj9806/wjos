@@ -293,6 +293,31 @@ int sys_isatty(int file)
     return p_file->type == FILE_TTY;
 }
 
+int sys_ioctl(int fd, int cmd, int arg0, int arg1)
+{
+    if (is_fd_bed(fd))
+    {
+        log_printf("file is invalid: %d", fd);
+        return -1;
+    }
+    file_t * p_file = task_file(fd);
+    if (!p_file)
+    {
+        log_printf("file not opened: %d", fd);
+        return -1;
+    }
+    
+    fs_t * fs = p_file->fs;
+    int err = -1;
+    fs_protect(fs);
+    if (fs->op->ioctl)
+    {
+        err = fs->op->ioctl(p_file, cmd, arg0, arg1);
+    }
+    fs_unprotect(fs);
+    return err;
+}
+
 int sys_fstat(int file, struct stat * st)
 {
     return -1;    if (is_fd_bed(file))
