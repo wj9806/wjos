@@ -119,8 +119,9 @@ static int do_ls(int argc, char ** argv)
     struct dirent * entry;
     while ((entry = readdir(p_dir)) != NULL)
     {
+        strlwr(entry->name);
         printf("%c %s %d\n", 
-            entry->type = FILE_DIR ? 'd' : 'f', 
+            entry->type == FILE_DIR ? 'd' : 'f', 
             entry->name, 
             entry->size);
     }
