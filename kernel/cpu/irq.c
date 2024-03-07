@@ -3,6 +3,7 @@
 #include "cpu/cpu.h"
 #include "os_cfg.h"
 #include "tools/log.h"
+#include "core/task.h"
 
 #define IDT_TABLE_NR 128
 
@@ -43,9 +44,17 @@ static void do_default_handle(exception_frame_t * frame, const char* msg)
 {
     log_printf("[ERROR] - IRQ Exception happend: %s ", msg);
     dump_core_regs(frame);
-    for(;;)
+
+    if (frame -> cs & 0x3)
     {
-        hlt();
+        sys_exit(frame->error_code);
+    }
+    else
+    {
+        while (1)
+        {
+            hlt();
+        }
     }
 }
 
@@ -124,9 +133,17 @@ void do_handle_general_protection(exception_frame_t * frame) {
     log_printf("segment index: %d", frame->error_code & 0xFFF8);
 
     dump_core_regs(frame);
-    while (1)
+
+    if (frame -> cs & 0x3)
     {
-        hlt();
+        sys_exit(frame->error_code);
+    }
+    else
+    {
+        while (1)
+        {
+            hlt();
+        }
     }
 }
 
@@ -151,9 +168,17 @@ void do_handle_page_fault(exception_frame_t * frame) {
     }
 
     dump_core_regs(frame);
-    while (1)
+
+    if (frame -> cs & 0x3)
     {
-        hlt();
+        sys_exit(frame->error_code);
+    }
+    else
+    {
+        while (1)
+        {
+            hlt();
+        }
     }
 }
 

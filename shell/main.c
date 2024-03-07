@@ -277,6 +277,17 @@ static void run_builtin(const cli_cmd_t * cmd, int argc, char ** argv)
     
 }
 
+static const char * find_exec_path(const char * filename)
+{
+    int fs = open(filename, 0);
+    if (fs < 0)
+    {
+        return (const char *)0;
+    }
+    close(fs);
+    return filename;
+}
+
 static void run_exec_file(const char * path, int argc, char ** argv)
 {
     int pid = fork();
@@ -286,9 +297,10 @@ static void run_exec_file(const char * path, int argc, char ** argv)
         }
         else if (pid == 0)
         {   
-            for (int i = 0; i < argc; i++)
+            int err = execve(path, argv, (char * const *)0);
+            if (err < 0)
             {
-                printf("arg %s\n", argv[i]);
+                fprintf(stderr, "exec failed %s", path);
             }
             exit(-1);
         }
@@ -347,8 +359,13 @@ int main(int argc, char ** argv)
             continue;
         }
 
-        //磁盘加载
-        run_exec_file("", argc, argv);
+        const char * path = find_exec_path(argv[0]);
+        if (path)
+        {
+            //磁盘加载
+            run_exec_file(path, argc, argv);
+            continue;
+        }
 
         fprintf(stderr, ESC_COLOR_ERROR"%s: command not found\n"ESC_COLOR_DEFAULT, cli.curr_input);
     }
