@@ -4,6 +4,7 @@
 #include "tools/klib.h"
 #include "core/memory.h"
 #include "fs/fs.h"
+#include <sys/fcntl.h>
 
 //缓存读取磁盘数据
 static int bread_sector (fat_t * fat, int sector) {
@@ -30,6 +31,27 @@ static diritem_t * read_dir_entry (fat_t * fat, int index) {
         return (diritem_t *)0;
     }
     return (diritem_t *)(fat->fat_buffer + offset % fat->bytes_per_sec);
+}
+
+//写缓存
+static int bwrite_secotr (fat_t * fat, int sector) {
+    int cnt = dev_write(fat->fs->dev_id, sector, fat->fat_buffer, 1);
+    return (cnt == 1) ? 0 : -1;
+}
+
+static int write_dir_entry (fat_t * fat, diritem_t * item, int index) {
+    if ((index < 0) || (index >= fat->root_ent_cnt)) {
+        return -1;
+    }
+
+    int offset = index * sizeof(diritem_t);
+    int sector = fat->root_start + offset / fat->bytes_per_sec;
+    int err = bread_sector(fat, sector);
+    if (err < 0) {
+        return -1;
+    }
+    kernel_memcpy(fat->fat_buffer + offset % fat->bytes_per_sec, item, sizeof(diritem_t));
+    return bwrite_secotr(fat, sector);
 }
 
 static file_type_t diritem_get_type (diritem_t * item) {
@@ -150,6 +172,25 @@ void fatfs_unmount(struct _fs_t * fs)
     memory_free_page((uint32_t)fat->fat_buffer);
 }
 
+
+static int diritem_init(diritem_t * item, uint8_t attr, const char * name)
+{
+    to_sfn((char *)item->DIR_Name, name);
+    item->DIR_FstClusHI = (uint16_t )(FAT_CLUSTER_INVALID >> 16);
+    item->DIR_FstClusL0 = (uint16_t )(FAT_CLUSTER_INVALID & 0xFFFF);
+    item->DIR_FileSize = 0;
+    item->DIR_Attr = attr;
+    item->DIR_NTRes = 0;
+
+    // 时间写固定值，简单方便
+    item->DIR_CrtTime = 0;
+    item->DIR_CrtDate = 0;
+    item->DIR_WrtTime = item->DIR_CrtTime;
+    item->DIR_WrtDate = item->DIR_CrtDate;
+    item->DIR_LastAccDate = item->DIR_CrtDate;
+    return 0;
+}
+
 int fatfs_open(struct _fs_t * fs, const char * path, file_t * file)
 {
     int p_index = -1;
@@ -189,6 +230,21 @@ int fatfs_open(struct _fs_t * fs, const char * path, file_t * file)
     if (file_item)
     {
         read_from_diritem(fat, file, file_item, p_index);
+        return 0;
+    }
+    //判断是否需要创建
+    else if (file->mode & O_CREAT)
+    {
+        diritem_t item;
+        diritem_init(&item, 0, path);
+
+        int err = write_dir_entry(fat, &item, p_index);
+        if (err < 0)
+        {
+            log_printf("create file failed");
+            return -1;
+        }
+        read_from_diritem(fat, file, &item, p_index);
         return 0;
     }
     

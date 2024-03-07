@@ -250,6 +250,7 @@ int disk_write(device_t * dev, int addr, char * buf, int size)
     mutex_lock(disk->mutex);
     task_on_op = 1;
     int count;
+    disk_send_cmd(disk, part_info->start_sector + addr, count, DISK_CMD_WRITE);
     for (count = 0; count < size; count++, buf += disk->sector_size) {
         disk_write_datas(disk, buf, disk->sector_size);
 
