@@ -277,6 +277,51 @@ static int cluster_get_next(fat_t * fat, cluster_t curr)
     return *(cluster_t*)(fat->fat_buffer + off_sector);
 }
 
+static int cluster_set_next(fat_t * fat, cluster_t curr, cluster_t next)
+{
+    if (!cluster_is_valid(curr)) {
+        return -1;
+    }
+    int offset = curr * sizeof(cluster_t);
+    int sector = offset / fat->bytes_per_sec;
+    //在扇区的偏移
+    int off_sector = offset % fat->bytes_per_sec;
+    if (sector >= fat->tbl_sectors)
+    {
+        log_printf("cluster too big. %d", curr);
+        return FAT_CLUSTER_INVALID;
+    }
+    // 读扇区，然后取其中簇数据
+    int err = bread_sector(fat, fat->tbl_start + sector);
+    if (err < 0) {
+        return FAT_CLUSTER_INVALID;
+    }
+
+    *(cluster_t*)(fat->fat_buffer + off_sector) = next;
+    for (int i = 0; i < fat->tbl_cnt; i++)
+    {
+        err = bwrite_secotr(fat, fat->tbl_start + sector);
+        if (err < 0)
+        {
+            log_printf("write cluster failed");
+            return -1;
+        }
+        sector += fat->tbl_sectors;
+    }
+    
+    return 0;
+}
+
+static void cluster_free_chain(fat_t * fat, cluster_t start)
+{
+    while (cluster_is_valid(start))
+    {
+        cluster_t next = cluster_get_next(fat, start);
+        cluster_set_next(fat, start, FAT_CLUSTER_FREE);
+        start = next;
+    }   
+}
+
 static int move_file_pos(file_t* file, fat_t * fat, uint32_t move_bytes, int expand)
 {
     uint32_t c_offset = file->pos % fat->cluster_byte_size;
@@ -472,6 +517,41 @@ int fatfs_closedir(struct _fs_t * fs, DIR * dir)
     return 0;
 }
 
+int fatfs_unlink(struct _fs_t * fs, const char * path)
+{
+    fat_t * fat = (fat_t *)fs->data;
+    for (int i = 0; i < fat->root_ent_cnt; i++)
+    {
+        diritem_t * item = read_dir_entry(fat, i);
+        if (item == (diritem_t *)0) 
+        {
+            return -1;
+        }
+
+         // 结束项，不需要再扫描了，同时index也不能往前走
+        if (item->DIR_Name[0] == DIRITEM_NAME_END) 
+        {
+            break;
+        }
+
+        // 只显示普通文件和目录，其它的不显示
+        if (item->DIR_Name[0] == DIRITEM_NAME_FREE) 
+        {
+            continue;
+        }
+
+        // 找到要打开的目录
+        if (diritem_name_match(item, path)) 
+        {
+            int cluster = (item->DIR_FstClusHI << 16) | item->DIR_FstClusL0;
+            cluster_free_chain(fat, cluster);
+            diritem_t item;
+            kernel_memset(&item, 0, sizeof(diritem_t));
+            return write_dir_entry(fat, &item, i);
+        }
+    }
+    return -1;
+}
 
 fs_op_t fatfs_op = {
     .mount = fatfs_mount,
@@ -485,4 +565,5 @@ fs_op_t fatfs_op = {
     .opendir = fatfs_opendir,
     .readdir = fatfs_readdir,
     .closedir = fatfs_closedir,
+    .unlink = fatfs_unlink,
 };

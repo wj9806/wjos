@@ -79,4 +79,6 @@ struct dirent * readdir(DIR * dir);
 
 int closedir(DIR * dir);
 
+int unlink(const char * pathname);
+
 #endif
