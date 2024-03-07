@@ -93,4 +93,6 @@ typedef struct _fat_t {
 
 typedef uint16_t cluster_t;
 
+cluster_t cluster_alloc_free(fat_t * fat, int cnt);
+
 #endif

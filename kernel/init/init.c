@@ -47,8 +47,10 @@ void move_to_first_task(void)
 
 void main_init (void)
 {
+    log_printf("=================================================");
     log_printf("wjos-kernel is running....");
     log_printf("wjos-kernel version: %s, date: %s", OS_VERSION, OS_TIME);
+    log_printf("=================================================");
     
     task_first_init();
     move_to_first_task();

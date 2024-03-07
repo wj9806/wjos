@@ -130,7 +130,7 @@ int sys_open(const char * name, int flags, ...)
 
     fs_protect(fs);
     int err = fs->op->open(fs, name, file);
-    if (file < 0)
+    if (err < 0)
     {
         fs_unprotect(fs);
         log_printf("open %s failed", name);
