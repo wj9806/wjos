@@ -13,7 +13,6 @@
 #include <sys/file.h>
 
 #define FS_TABLE_SIZE            8
-#define TEMP_FILE_ID             100
 
 static list_t mounted_list;
 static fs_t fs_table[FS_TABLE_SIZE];
@@ -23,9 +22,6 @@ extern fs_op_t devfs_op;
 extern fs_op_t fatfs_op;
 
 static fs_t * root_fs;
-
-static uint8_t TEMP_ADDR[100*1024];
-static uint8_t * temp_pos;
 
 int path_to_num(const char * path, int * num)
 {
@@ -93,17 +89,6 @@ static void fs_unprotect(fs_t * fs)
 
 int sys_open(const char * name, int flags, ...)
 {
-    if (kernel_strcmp(name, "/shell.elf", 4) == 0)
-    {
-        //打开disk1
-        int dev_id = dev_open(DEV_DISK, 0xa0, (void *)0);
-        //5000 扇区号
-        dev_read(dev_id, 5000, (uint8_t *) TEMP_ADDR, 80);
-        //read_disk(5000, 80, (uint8_t *) TEMP_ADDR);
-        temp_pos = (uint8_t *) TEMP_ADDR;
-        return TEMP_FILE_ID;
-    }
-
     int fd = -1;
     file_t * file = file_alloc();
     if (!file)
@@ -164,12 +149,6 @@ sys_open_failed:
 
 int sys_read(int file, char * ptr, int len)
 {
-    if (file == TEMP_FILE_ID)
-    {
-        kernel_memcpy(ptr, temp_pos, len);
-        temp_pos += len;
-        return len;
-    }
     if (is_fd_bed(file) || !ptr || !len)
     {
         return 0;
@@ -221,12 +200,6 @@ int sys_write(int file, char * ptr, int len)
 //ptr 相对于文件开头的指针
 int sys_lseek(int file, int ptr, int dir)
 {
-    if (file == TEMP_FILE_ID)
-    {
-        temp_pos = (uint8_t *) (TEMP_ADDR + ptr);
-        return 0;
-    }
-
    if (is_fd_bed(file))
     {
         return 0;
@@ -248,11 +221,6 @@ int sys_lseek(int file, int ptr, int dir)
 
 int sys_close(int file)
 {
-    if (file == TEMP_FILE_ID)
-    {
-        return 0;
-    }
-
     if (is_fd_bed(file))
     {
         return 0;

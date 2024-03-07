@@ -306,7 +306,43 @@ void fatfs_close(file_t * file)
 
 int fatfs_seek(file_t * file, uint32_t offset, int dir)
 {
-    return -1;
+    if (dir != 0)
+    {
+        return -1;
+    }
+    fat_t * fat = (fat_t *) file->fs->data;
+    cluster_t current_cluster = file->cblk;
+    uint32_t curr_pos = 0;
+    uint32_t offset_to_move = offset;
+    while (offset_to_move)
+    {
+        //当前指针在簇的偏移量
+        uint32_t c_offset = curr_pos % fat->cluster_byte_size;
+        uint32_t curr_move = offset_to_move;
+
+        //不超过一簇
+        if (c_offset+ curr_move < fat->cluster_byte_size)
+        {
+            curr_pos += curr_move;
+            break;
+        }
+        
+        //超过一簇
+        curr_move = fat->cluster_byte_size - c_offset;
+        curr_pos += curr_move;
+        offset_to_move -= curr_move;
+
+        //下一个簇
+        current_cluster = cluster_get_next(fat, current_cluster);
+        if (!cluster_is_valid(current_cluster))
+        {
+            return -1;
+        }
+    }
+    
+    file->pos = curr_pos;
+    file->cblk = current_cluster;
+    return 0;
 }
 
 int fatfs_stat(file_t * file, struct stat * st)
@@ -341,8 +377,6 @@ void diritem_get_name (diritem_t * item, char * dest) {
         ext[0] = '\0';
     }
 }
-
-
 
 int fatfs_readdir(struct _fs_t * fs, DIR * dir, struct dirent * dirent)
 {
