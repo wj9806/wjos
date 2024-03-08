@@ -181,6 +181,8 @@ int console_init(int idx)
     return 0;
 }
 
+extern void start_beep();
+
 static void write_normal(console_t * c, char ch)
 {
     switch (ch)
@@ -191,6 +193,9 @@ static void write_normal(console_t * c, char ch)
         case 0x7f:
             //往回删除一个字符
             erase_backword(c);
+            break;
+        case '\a':
+            start_beep();
             break;
         case '\b':
             //往左移动一个光标

@@ -4,4 +4,6 @@ qemu-system-i386 \
     -s -S \
     -drive file=disk1.img,index=0,media=disk,format=raw \
     -drive file=disk2.img,index=1,media=disk,format=raw \
+    -audiodev pa,id=hda \
+    -machine pcspk-audiodev=hda \
     -d pcall,page,mmu,cpu_reset,guest_errors,page,trace:ps2_keyboard_set_translation \
