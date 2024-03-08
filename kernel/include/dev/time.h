@@ -3,6 +3,7 @@
 
 #include "comm/types.h"
 #include <sys/_timeval.h>
+#include "applib/lib_syscall.h"
 
 #define CMOS_ADDR               0x70         // CMOS 地址寄存器
 #define CMOS_DATA               0x71         // CMOS 数据寄存器
@@ -46,6 +47,10 @@ void time_read(tm_t *time);
 
 time_t sys_mktime(tm_t *time);
 
-void sys_localtime(time_t stamp, tm_t *time);
+time_t sys_time();
+
+int sys_gettimeofday(struct timeval* tv, timezone * tz);
+
+int sys_gmtime_r(const time_t *timep, struct tm *result);
 
 #endif

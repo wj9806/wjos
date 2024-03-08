@@ -37,6 +37,7 @@
         "getopt.h": "c",
         "fatfs.h": "c",
         "file.h": "c",
-        "fs.h": "c"
+        "fs.h": "c",
+        "time.h": "c"
     },
 }

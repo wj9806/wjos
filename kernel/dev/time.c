@@ -1,7 +1,8 @@
 #include "dev/time.h"
 #include "tools/log.h"
 #include "comm/cpu_instr.h"
-
+#include "dev/clock.h"
+#include "os_cfg.h"
 
 // 每个月开始时的已经过去天数
 static int month[13] = {
@@ -19,6 +20,7 @@ static int month[13] = {
     (31 + 29 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31),
     (31 + 29 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30)};
 
+//单位秒
 time_t startup_time;
 int century;
 
@@ -155,7 +157,74 @@ time_t sys_mktime(tm_t *time)
     return res;
 }
 
-void sys_localtime(time_t stamp, tm_t *time)
+int sys_gettimeofday(struct timeval* tv, timezone * tz)
 {
+    time_t t = sys_time();
+    tv->tv_sec = t;
+    tv->tv_usec =  (get_sys_tick() * (1000 / OS_TICKS_MS)) % 1000;
+    //暂不考虑时区
+    return 0;
+}
 
+time_t sys_time()
+{
+    return startup_time + (get_sys_tick() * OS_TICKS_MS) / 1000;
+}
+
+uint32_t fml_stamp_to_time(long timep, struct tm * date)
+{
+    uint32_t days = timep / 86400;
+    uint32_t rem = timep % 86400;
+ 
+    // 计算年份
+    uint16_t year;
+    for (year = 1970; ; ++year)
+    {
+        uint16_t leap = ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0);
+        uint16_t ydays = leap ? 366 : 365;
+        if (days < ydays)
+        {
+            break;
+        }
+        days -= ydays;
+    }
+    date->tm_year = year - 1900;
+    date->tm_yday = days;
+    date->tm_wday = date->tm_yday % 7 + 1;
+    // 计算月份
+    static const uint16_t days_in_month[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    uint16_t month;
+    for (month = 0; month < 12; month++)
+    {
+        uint16_t mdays = days_in_month[month];
+        if (month == 1 && ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0))
+        {
+            mdays = 29;
+        }
+        if (days < mdays)
+        {
+            break;
+        }
+        days -= mdays;
+    }
+    date->tm_mon = month;
+ 
+    // 计算日期
+    date->tm_mday = days + 1;
+ 
+    // 计算时间
+    date->tm_hour = rem / 3600;
+    rem %= 3600;
+    date->tm_min = rem / 60;
+    date->tm_sec = rem % 60;
+    date->tm_isdst = 0;
+    return 0;
+}
+
+
+int sys_gmtime_r(const time_t * timep, struct tm * result)
+{
+    long t = (long)(*timep);
+    fml_stamp_to_time(t, result);
+    return (int)result;
 }

@@ -3,6 +3,7 @@
 
 #include <sys/stat.h>
 #include <stddef.h>
+#include <time.h>
 
 typedef struct _syscall_args_t
 {
@@ -31,6 +32,10 @@ typedef struct _DIR
     
 } DIR;
 
+typedef struct _timezone {
+	int	tz_minuteswest;	/* minutes west of Greenwich */
+	int	tz_dsttime;	/* type of dst correction */
+} timezone;
 
 void sleep(int ms);
 
@@ -80,5 +85,9 @@ struct dirent * readdir(DIR * dir);
 int closedir(DIR * dir);
 
 int unlink(const char * pathname);
+
+int gettimeofday(struct timeval* tv, timezone * tz);
+
+struct tm *gmtime_r(const time_t *timep, struct tm *result); 
 
 #endif

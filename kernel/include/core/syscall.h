@@ -30,6 +30,8 @@
 
 #define SYS_PRINT_MSG               100
 
+#define SYS_GETTIMEOFDAY            120
+#define SYS_GMTIME_R                121
 
 #define SYSCALL_PARAM_COUNT         5
 

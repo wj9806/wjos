@@ -249,3 +249,23 @@ int unlink(const char * pathname)
     
     return sys_call(&args);
 }
+
+int gettimeofday(struct timeval* tv, timezone * tz)
+{
+    syscall_args_t args;
+    args.id = SYS_GETTIMEOFDAY;
+    args.arg0 = (int) tv;
+    args.arg1 = (int) tz;
+    
+    return sys_call(&args);
+}
+
+struct tm * gmtime_r(const time_t *timep, struct tm * result)
+{
+    syscall_args_t args;
+    args.id = SYS_GMTIME_R;
+    args.arg0 = (int) timep;
+    args.arg1 = (int) result;
+    
+    return (struct tm *)sys_call(&args);
+}

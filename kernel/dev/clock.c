@@ -1,5 +1,4 @@
 #include "dev/clock.h"
-#include "comm/types.h"
 #include "comm/cpu_instr.h"
 #include "os_cfg.h"
 #include "cpu/irq.h"
@@ -8,6 +7,11 @@
 static uint32_t sys_tick;
 
 int beeping = 0;
+
+uint32_t get_sys_tick()
+{
+    return sys_tick;
+}
 
 void start_beep()
 {

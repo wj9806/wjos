@@ -1,6 +1,8 @@
 #ifndef __CLOCK_H__
 #define __CLOCK_H__
 
+#include "comm/types.h"
+
 // 定时器的寄存器和各项位配置
 #define PIT_OSC_FREQ             1193182
 #define PIT_COMMAND_MODE_PORT    0x43
@@ -19,5 +21,7 @@
 void clock_init (void);
 
 void exception_handler_clock (void);
+
+uint32_t get_sys_tick();
 
 #endif
