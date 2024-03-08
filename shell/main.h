@@ -27,6 +27,7 @@ typedef struct _cli_t
     const cli_cmd_t * cmd_start;
     const cli_cmd_t * cmd_end;
     const char * prompt;
+    int size;
 } cli_t;
 
 

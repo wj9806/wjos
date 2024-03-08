@@ -42,6 +42,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/kernel/include
     ${PROJECT_SOURCE_DIR}/libc/include
+    ${PROJECT_SOURCE_DIR}/shell/include
 )
 
 # 底层的若干子项目：含内核及应用程序
@@ -51,11 +52,9 @@ add_subdirectory(./kernel)
 add_subdirectory(./applib)
 add_subdirectory(./shell)
 add_subdirectory(./tests/init)
-add_subdirectory(./tests/loop)
 
 # 添加编译依赖，先生成app库，再生成kernel和shell
 # 不加则cmake则可能先编译shell和kernel，而缺少libapp，导致编译错误
 add_dependencies(init app)       
 add_dependencies(shell app)
-add_dependencies(loop app)
 add_dependencies(kernel app)

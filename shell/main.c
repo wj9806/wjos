@@ -1,299 +1,16 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <getopt.h>
-#include <sys/file.h>
-#include <time.h>
 #include "main.h"
-#include "lib_syscall.h"
-#include "fs/file.h"
-#include "dev/tty.h"
+#include "cmd/cmd.h"
+#include "applib/lib_syscall.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/fcntl.h>
 
-char cmd_buf[256];
-
-static cli_t cli;
+cli_t cli;
+static char cmd_buf[256];
 static const char * prompt = "[root@localhost ~] # ";
 
-static int do_help(int argc, char **argv)
-{
-    const cli_cmd_t * start = cli.cmd_start;
-    while (start < cli.cmd_end)
-    {
-        printf("%s %s\n", start->name, start->usage);
-        start++;
-    }
-    
-    return 0;
-}
-
-static int do_clear(int argc, char ** argv)
-{
-    printf("%s", ESC_CLEAR_SCREEN);
-    printf("%s", ESC_MOVE_CURSOR(0, 0));
-    return 0;
-}
-
-static int do_echo(int argc, char ** argv)
-{
-    if (argc == 1)
-    {
-        char msg_buf[128];
-        fgets(msg_buf, sizeof(msg_buf), stdin);
-        msg_buf[sizeof(msg_buf) - 1] = '\0';
-        puts(msg_buf);
-        return 0;
-    }
-    
-    int count = 1;
-    int ch;
-    int n = 0;
-    while ((ch = getopt(argc, argv, "n:h")) != -1)
-    {
-        switch (ch)
-        {
-            //echo -h
-            case 'h':
-                puts("echo any message");
-                puts("Usage: echo [-n count] message");
-                // getopt需要多次调用，需要重置
-                optind = 1;
-                return 0;
-            case 'n':
-                //atoi 把字符串转换成整型数。
-                count = atoi(optarg);
-                n = 1;
-                break;
-            case '?':
-                if (optarg)
-                {
-                    fprintf(stderr, "Unknown option: -%s", optarg);
-                }
-                optind = 1;
-                return -1;
-            default:
-                break;
-        }
-    }
-    // 索引已经超过了最后一个参数的位置，意味着没有传入要发送的信息
-    if (optind > argc -1)
-    {
-        fprintf(stderr, "Message is empty \n");
-        optind = 1;
-        return -1;
-    }
-
-    if (n == 1)
-    {
-        // 循环打印消息
-        char * msg = argv[optind];
-        for (int i = 0; i < count; i++) {
-            puts(msg);
-        }
-    }
-    else
-    {
-        for (int i = 1; i < argc; i++)
-        {
-            printf(argv[i], "");
-            printf(" ");
-        }
-        printf("\n");
-    }
-
-    optind = 1;
-    return 0;
-}
-
-static int do_exit(int argc, char ** argv)
-{
-    exit(0);
-    return 0;
-}
-
-static int do_ls(int argc, char ** argv)
-{
-    DIR * p_dir = opendir("temp");
-    if (p_dir == NULL)
-    {
-        printf("open dir failed.\n");
-        return -1;
-    }
-    struct dirent * entry;
-    while ((entry = readdir(p_dir)) != NULL)
-    {
-        strlwr(entry->name);
-        printf("%c %s %d\n", 
-            entry->type == FILE_DIR ? 'd' : 'f', 
-            entry->name, 
-            entry->size);
-    }
-    closedir(p_dir);
-    return 0;
-}
-
-static int do_less(int argc, char ** argv)
-{
-    int line_mode = 0;
-    int ch;
-    while ((ch = getopt(argc, argv, "lh")) != -1) {
-        switch (ch) {
-            case 'h':
-                puts("show file content");
-                puts("less [-l] file");
-                puts("-l show file line by line.");
-                break;
-            case 'l':
-                line_mode = 1;
-                break;
-            case '?':
-                if (optarg) {
-                    fprintf(stderr, "Unknown option: -%s\n", optarg);
-                }
-                optind = 1;        // getopt需要多次调用，需要重置
-                return -1;
-        }
-    }
-    // 索引已经超过了最后一个参数的位置，意味着没有传入要发送的信息
-    if (optind > argc - 1) {
-        fprintf(stderr, "no file\n");
-        optind = 1;        // getopt需要多次调用，需要重置
-        return -1;
-    }
-    FILE * file = fopen(argv[optind], "r");
-    if (file == NULL) {
-        fprintf(stderr, "open file failed. %s", argv[optind]);
-        optind = 1;        // getopt需要多次调用，需要重置
-        return -1;
-    }
-
-    char * buf = (char *)malloc(255);
-    if (line_mode == 0)
-    {
-        while (fgets(buf, 255, file) != NULL)  {
-            fputs(buf, stdout);
-        }
-    }
-    else
-    {
-        //设置输入无缓存
-        setvbuf(stdin, NULL, _IONBF, 0);
-        ioctl(0, TTY_CMD_ECHO, 0, 0);
-        while (1)
-        {
-            char * b = fgets(buf, 255, file);
-            if (b == NULL)
-            {
-                break;
-            }
-            fputs(buf, stdout);
-            int ch;
-            while ((ch = fgetc(stdin)) != 'n') {
-                if (ch == 'q') {
-                    goto less_quit;
-                }
-            }
-        }
-less_quit:   
-        setvbuf(stdin, NULL, _IOLBF, BUFSIZ);
-        ioctl(0, TTY_CMD_ECHO, 1, 0);
-    }
-
-    free(buf);
-    fclose(file);
-    optind = 1;        // getopt需要多次调用，需要重置
-    return 0;
-}
-
-static int do_cat(int argc, char ** argv)
-{
-    if (argc != 2)
-    {
-        fprintf(stderr, "cat invalid param");
-        return -1;
-    }
-    FILE * file = fopen(argv[argc-1], "r");
-
-    char * buf = (char *)malloc(255);
-    while (fgets(buf, 255, file) != NULL)  {
-        fputs(buf, stdout);
-    }
-    fclose(file);
-    return 0;
-}
-
-
-static int do_cp(int argc, char ** argv)
-{
-    if (argc < 3)
-    {
-        fprintf(stderr, "no [src] or no [dest]");
-        return -1;
-    }
-    FILE * from, * to;
-    from = fopen(argv[1], "rb");
-    to = fopen(argv[2], "wb");
-    if (!from || !to)
-    {
-        fprintf(stderr, "open file failed");
-        goto cp_failed;
-    }
-
-    char * buf = (char*)malloc(255);
-    int size;
-    //fread  从给定流 stream 读取数据到 ptr 所指向的数组中。
-    while ((size = fread(buf, 1, 255, from)) > 0)
-    {
-        fwrite(buf, 1, size, to);
-    }
-    free(buf);
-    
-cp_failed:    
-    if (from)
-    {
-        fclose(from);
-    }
-    if (to)
-    {
-        fclose(to);
-    }
-    return 0;
-}
-
-static int do_rm(int argc, char ** argv)
-{
-    if (argc < 2)
-    {
-        fprintf(stderr, "no file");
-        return -1;
-    }
-    int err = unlink(argv[1]);
-    if (err < 0)
-    {
-        fprintf(stderr, "rm file failed: %s", argv[1]);
-        return err;
-    }
-    
-    return 0;
-}
-
-static int do_date(int argc, char ** argv)
-{
-    time_t timep;
-    struct tm *p;
-    time(&timep);
-    p = localtime(&timep);
-
-    printf("%d/%d/%d %02d:%02d:%02d\n", 
-        1900 + p->tm_year, 
-        1+ p->tm_mon,
-        p->tm_mday, 
-        p->tm_hour, 
-        p->tm_min, p->tm_sec);
-
-    return 0;
-}
-
-static const cli_cmd_t cmd_list[] = {
+const cli_cmd_t cmd_list[] = {
     {
         .name = "help",
         .usage = "help -- list supported command",
@@ -360,6 +77,7 @@ static void cli_init(void)
     int size = sizeof(cmd_list) / sizeof(cmd_list[0]);
     cli.cmd_start = cmd_list;
     cli.cmd_end = cmd_list + size;
+    cli.size = size;
 }
 
 static void show_prompt(void)
@@ -434,14 +152,8 @@ static void run_exec_file(const char * path, int argc, char ** argv)
         }
 }
 
-int main(int argc, char ** argv)
+void hang(int argc, char ** argv)
 {
-    int fd = open(argv[0], O_RDWR); //stdin
-    dup(fd);                   //stdout
-    dup(fd);                   //stderr
-
-    cli_init();
-
     for(;;)
     {
         show_prompt();
@@ -490,4 +202,13 @@ int main(int argc, char ** argv)
 
         fprintf(stderr, ESC_COLOR_ERROR"%s: command not found\n"ESC_COLOR_DEFAULT, cli.curr_input);
     }
+}
+
+int main(int argc, char ** argv)
+{
+    int fd = open(argv[0], O_RDWR); //stdin
+    dup(fd);                   //stdout
+    dup(fd);                   //stderr
+    cli_init();
+    hang(argc, argv);
 }

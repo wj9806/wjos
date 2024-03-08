@@ -6,12 +6,10 @@ int main(int argc, char ** argv)
 {
     time_t timep;
     struct tm *p;
-    while (1)
+    int i = 10;
+    while (i--)
     {
         time(&timep);
-        printf("%ld\n", timep);
-
-        
         p = localtime(&timep);
 
         printf("%d/%d/%d %02d:%02d:%02d\n", 

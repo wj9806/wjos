@@ -38,6 +38,10 @@
         "fatfs.h": "c",
         "file.h": "c",
         "fs.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "tty.h": "c",
+        "cmd.h": "c",
+        "string.h": "c",
+        "main.h": "c"
     },
 }

@@ -133,7 +133,7 @@ int sys_open(const char * name, int flags, ...)
     if (err < 0)
     {
         fs_unprotect(fs);
-        log_printf("open %s failed", name);
+        //log_printf("open %s failed", name);
         goto sys_open_failed;
     }
     fs_unprotect(fs);
