@@ -17,7 +17,7 @@
         "os_cfg.h": "c",
         "irq.h": "c",
         "cpu_instr.h": "c",
-        "time.h": "c",
+        "clock.h": "c",
         "klib.h": "c",
         "list.h": "c",
         "mutex.h": "c",

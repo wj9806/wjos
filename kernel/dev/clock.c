@@ -1,4 +1,4 @@
-#include "dev/time.h"
+#include "dev/clock.h"
 #include "comm/types.h"
 #include "comm/cpu_instr.h"
 #include "os_cfg.h"
@@ -23,7 +23,7 @@ void start_beep()
     }
 }
 
-void do_handle_time(exception_frame_t * frame)
+void do_handle_clock(exception_frame_t * frame)
  {
     sys_tick++;
     // 先发EOI，而不是放在最后
@@ -48,12 +48,12 @@ static void init_pit(void)
     outb(PIT_CHANNEL2_DATA_PORT, (uint8_t)beep_count);
     outb(PIT_CHANNEL2_DATA_PORT, (uint8_t)(beep_count >> 8));
 
-    irq_install(IRQ0_TIMER, (irq_handle_t)exception_handler_time);
+    irq_install(IRQ0_TIMER, (irq_handle_t)exception_handler_clock);
     irq_enable(IRQ0_TIMER);
 }
 
 
-void time_init (void)
+void clock_init (void)
 {
     sys_tick = 0;
     init_pit();

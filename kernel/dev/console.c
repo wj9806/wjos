@@ -420,10 +420,10 @@ int console_select(int idx)
     //找到需要显示的地址（相对于第一个console）
     uint16_t pos = idx * console->display_rows * console->display_cols;
 
-    outb(0x3D4, 0xC);
-    outb(0x3D5, (uint8_t)(pos >> 8) & 0xFF);
-    outb(0x3D4, 0xD);
-    outb(0x3D5, (uint8_t)(pos & 0xFF));
+    outb(CRT_ADDR_PORT, CRT_START_ADDR_H);
+    outb(CRT_DATA_PORT, (uint8_t)(pos >> 8) & 0xFF);
+    outb(CRT_ADDR_PORT, CRT_START_ADDR_L);
+    outb(CRT_DATA_PORT, (uint8_t)(pos & 0xFF));
     curr_console_idx = idx;
     //更新光标位置
     update_cursor_pos(console);

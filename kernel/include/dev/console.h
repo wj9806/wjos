@@ -11,6 +11,11 @@
 #define CONSOLE_COL_MAX      80
 #define CONSOLE_NR           8
 
+#define CRT_ADDR_PORT        0x3D4   //crt(6845)索引寄存器
+#define CRT_DATA_PORT        0x3D5   //crt(6845)数据寄存器
+#define CRT_START_ADDR_H     0xC     //显存起始位置 高位
+#define CRT_START_ADDR_L     0XD     //显存起始位置 低位
+
 #define ASCII_ESC           0x1b
 #define ESC_PARAM_MAX       10
 
