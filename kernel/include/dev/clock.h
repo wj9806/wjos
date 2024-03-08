@@ -1,5 +1,5 @@
-#ifndef __TIMER_H__
-#define __TIMER_H__
+#ifndef __CLOCK_H__
+#define __CLOCK_H__
 
 // 定时器的寄存器和各项位配置
 #define PIT_OSC_FREQ             1193182
