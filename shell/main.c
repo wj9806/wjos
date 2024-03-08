@@ -203,6 +203,23 @@ less_quit:
     return 0;
 }
 
+static int do_cat(int argc, char ** argv)
+{
+    if (argc != 2)
+    {
+        fprintf(stderr, "cat invalid param");
+        return -1;
+    }
+    FILE * file = fopen(argv[argc-1], "r");
+
+    char * buf = (char *)malloc(255);
+    while (fgets(buf, 255, file) != NULL)  {
+        fputs(buf, stdout);
+    }
+    fclose(file);
+    return 0;
+}
+
 
 static int do_cp(int argc, char ** argv)
 {
@@ -286,6 +303,11 @@ static const cli_cmd_t cmd_list[] = {
         .do_func = do_ls
     },
     {
+        .name = "ll",
+        .usage = "list directory",
+        .do_func = do_ls
+    },
+    {
         .name = "less",
         .usage = "less file",
         .do_func = do_less
@@ -299,6 +321,11 @@ static const cli_cmd_t cmd_list[] = {
         .name = "rm",
         .usage = "rm file",
         .do_func = do_rm
+    },
+    {
+        .name = "cat",
+        .usage = "cat file",
+        .do_func = do_cat
     }
 };
 
