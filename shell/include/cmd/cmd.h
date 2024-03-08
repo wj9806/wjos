@@ -26,4 +26,6 @@ int do_rm(int argc, char ** argv);
 
 int do_date(int argc, char ** argv);
 
+int do_reboot(int argc, char ** argv);
+
 #endif

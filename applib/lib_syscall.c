@@ -269,3 +269,12 @@ struct tm * gmtime_r(const time_t *timep, struct tm * result)
     
     return (struct tm *)sys_call(&args);
 }
+
+int power(int status)
+{
+    syscall_args_t args;
+    args.id = SYS_POWER;
+    args.arg0 = (int) status;
+    
+    return sys_call(&args);
+}

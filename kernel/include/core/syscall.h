@@ -33,6 +33,8 @@
 #define SYS_GETTIMEOFDAY            120
 #define SYS_GMTIME_R                121
 
+#define SYS_POWER                   200
+
 #define SYSCALL_PARAM_COUNT         5
 
 typedef struct _syscall_frame_t

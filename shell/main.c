@@ -66,6 +66,11 @@ const cli_cmd_t cmd_list[] = {
         .name = "date",
         .usage = "show current date",
         .do_func = do_date
+    },
+    {
+        .name = "reboot",
+        .usage = "reboot kernel",
+        .do_func = do_reboot
     }
 };
 

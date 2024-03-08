@@ -90,4 +90,6 @@ int gettimeofday(struct timeval* tv, timezone * tz);
 
 struct tm *gmtime_r(const time_t *timep, struct tm *result); 
 
+int power(int status);
+
 #endif

@@ -1,5 +1,6 @@
 #include "core/syscall.h"
 #include "core/task.h"
+#include "core/sys.h"
 #include "tools/log.h"
 #include "fs/fs.h"
 #include "core/memory.h"
@@ -41,6 +42,7 @@ static const syscall_handler_t  sys_table[] = {
 
 	[SYS_GETTIMEOFDAY] =  (syscall_handler_t) sys_gettimeofday,
 	[SYS_GMTIME_R] 	   =  (syscall_handler_t) sys_gmtime_r,
+	[SYS_POWER]		   =  (syscall_handler_t) sys_power,
 };
 
 /**

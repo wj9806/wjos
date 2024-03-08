@@ -147,4 +147,11 @@ static inline void write_eflags(uint32_t eflags)
     __asm__ __volatile__("push %%eax\n\tpopf"::"a"(eflags));
 }
 
+static inline void io_out8(uint16_t port, uint8_t value)
+{
+	__asm__ __volatile__(
+        "outb %0, %%dx\n\tmfence\n\t":
+		:"a"(value),"d"(port):"memory");
+}
+
 #endif
