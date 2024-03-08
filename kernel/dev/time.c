@@ -14,18 +14,13 @@ void start_beep()
     if (!beeping)
     {
         outb(SPEAKER_REG_PORT, inb(SPEAKER_REG_PORT) | 0b11);
-    }
-    beeping = sys_tick + 5;
-}
+        beeping = 1;
+        
+        sys_sleep(BEEP_MS);
 
-void stop_beep()
-{
-    if (beeping && sys_tick > beeping)
-    {
         outb(SPEAKER_REG_PORT, inb(SPEAKER_REG_PORT) & 0xfc);
         beeping = 0;
     }
-    
 }
 
 void do_handle_time(exception_frame_t * frame)
@@ -36,11 +31,6 @@ void do_handle_time(exception_frame_t * frame)
     pic_send_eoi(IRQ0_TIMER);
     
     task_time_tick();
-    if (sys_tick % 200 == 0)
-    {
-        start_beep();
-    }
-    stop_beep();
  }
 
 static void init_pit(void)
