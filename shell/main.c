@@ -6,7 +6,7 @@
 #include <string.h>
 #include <sys/fcntl.h>
 
-cli_t cli;
+static cli_t cli;
 static char cmd_buf[256];
 static const char * prompt = "[root@localhost ~] # ";
 
@@ -71,6 +71,11 @@ const cli_cmd_t cmd_list[] = {
         .name = "reboot",
         .usage = "reboot kernel",
         .do_func = do_reboot
+    },
+    {
+        .name = "touch",
+        .usage = "touch [file]",
+        .do_func = do_touch
     }
 };
 
@@ -216,4 +221,16 @@ int main(int argc, char ** argv)
     dup(fd);                   //stderr
     cli_init();
     hang(argc, argv);
+}
+
+int do_help(int argc, char **argv)
+{
+    const cli_cmd_t * start = cli.cmd_start;
+    while (start < cli.cmd_end)
+    {
+        printf("%s %s\n", start->name, start->usage);
+        *start++;
+    }
+ 
+    return 0;
 }

@@ -4,8 +4,6 @@
 #include "shell/main.h"
 #include <stdio.h>
 
-extern cli_t cli;
-
 int do_help(int argc, char **argv);
 
 int do_clear(int argc, char ** argv);
@@ -27,5 +25,7 @@ int do_rm(int argc, char ** argv);
 int do_date(int argc, char ** argv);
 
 int do_reboot(int argc, char ** argv);
+
+int do_touch(int argc, char ** argv);
 
 #endif
