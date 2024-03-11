@@ -12,9 +12,6 @@ elseif (CMAKE_HOST_WIN32)
     set(TOOL_PREFIX  "x86_64-linux-gnu-")    # 待补充
 endif ()
 
-# set(TOOL_PREFIX  "x86_64-elf-")
-# set(TOOL_PREFIX  "i686-elf-")
-
 # C编译器与参数配置
 set(CMAKE_C_COMPILER "${TOOL_PREFIX}gcc") 
 #可以增加编译参数 -DRELEASE
@@ -43,6 +40,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/kernel/include
     ${PROJECT_SOURCE_DIR}/libc/include
     ${PROJECT_SOURCE_DIR}/shell/include
+    ${PROJECT_SOURCE_DIR}/utils/include
 )
 
 # 底层的若干子项目：含内核及应用程序
@@ -51,6 +49,7 @@ add_subdirectory(./loader)
 add_subdirectory(./kernel)
 add_subdirectory(./applib)
 add_subdirectory(./shell)
+add_subdirectory(./utils)
 add_subdirectory(./tests/init)
 
 # 添加编译依赖，先生成app库，再生成kernel和shell
@@ -58,3 +57,4 @@ add_subdirectory(./tests/init)
 add_dependencies(init app)       
 add_dependencies(shell app)
 add_dependencies(kernel app)
+add_dependencies(kernel shell)

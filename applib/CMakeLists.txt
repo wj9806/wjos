@@ -1,6 +1,6 @@
 project(app LANGUAGES C)  
 
-file(GLOB C_LIST "*.c" "*.h" "*.S")
+file(GLOB_RECURSE C_LIST "*.c" "*.h" "*.S")
 add_library(${PROJECT_NAME} ${C_LIST})
 
 # bin文件生成，写入到image目录下

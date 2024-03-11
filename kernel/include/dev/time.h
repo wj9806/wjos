@@ -47,6 +47,7 @@ void time_read(tm_t *time);
 
 time_t sys_mktime(tm_t *time);
 
+//返回当前的时间戳
 time_t sys_time();
 
 int sys_gettimeofday(struct timeval* tv, timezone * tz);

@@ -1,7 +1,7 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
-#define CLI_INPUT_SIZE              1024
+#define CLI_INPUT_SIZE              128
 #define CLI_MAX_ARG_COUNT           10
 
 //发送ESC转义序列完成清屏

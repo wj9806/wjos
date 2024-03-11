@@ -8,10 +8,11 @@ set(CMAKE_C_LINK_EXECUTABLE "${LINKER_TOOL} <OBJECTS> ${CMAKE_EXE_LINKER_FLAGS} 
 include_directories(
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/../applib/
+    ${PROJECT_SOURCE_DIR}/../utils/
 )
 
 # 将所有的汇编、C文件加入工程
-file(GLOB_RECURSE C_LIST "*.c" "*.h" "*.S")
+file(GLOB_RECURSE C_LIST "*.c" "*.h" "*.S" "../utils/*.h" "../utils/*.c")
 add_executable(${PROJECT_NAME} ${C_LIST})
 
 # 不带调试信息的elf生成，何种更小，写入到image目录下
