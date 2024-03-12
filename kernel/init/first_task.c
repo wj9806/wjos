@@ -3,7 +3,7 @@
 
 int first_task_main(void)
 {
-    print_msg("welcome to wjos", 0);
+    print_msg("\x1b[37m" "welcome to wjos!" "\x1b[39m", 0);
     
     for (int i = 0; i < 1; i++)
     {

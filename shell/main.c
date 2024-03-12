@@ -1,12 +1,12 @@
 #include "main.h"
-#include "cmd/cmd.h"
+#include "cmd_executor.h"
 #include "applib/lib_syscall.h"
-#include <stdlib.h>
-#include <stdio.h>
+#include "cmd/cmd.h"
 #include <string.h>
 #include <sys/fcntl.h>
 
-static cli_t cli;
+
+cli_t cli;
 static char cmd_buf[256];
 static const char * prompt = "[root@localhost ~] # ";
 
@@ -96,121 +96,42 @@ static void show_prompt(void)
     fflush(stdout);
 }
 
-static const cli_cmd_t * find_builtin(const char * name) 
+static int parse_arg(int* argc, char ** argv)
 {
-    for (const cli_cmd_t * cmd = cli.cmd_start; cmd < cli.cmd_end; cmd++)
+    //strchr 用于查找字符串中的一个字符，并返回该字符在字符串中第一次出现的位置
+    char * cr = strchr(cli.curr_input, '\n');
+    if (cr) *cr = '\0';
+    cr = strchr(cli.curr_input, '\r');
+    if (cr) *cr = '\0';
+
+    //strtok 分解字符串为一组字符串。
+    const char * space = " ";
+    char * token = strtok(cli.curr_input, space);
+    while (token && (*argc <= CLI_MAX_ARG_COUNT))
     {
-        if (strcmp(cmd->name, name) != 0)
-        {
-            continue;
-        }
-
-        return cmd;
+        argv[(*argc)++] = token;
+        token = strtok(NULL, space);
     }
-    return (cli_cmd_t *) 0;
+    return *argc;
 }
 
-static void run_builtin(const cli_cmd_t * cmd, int argc, char ** argv)
-{
-    int ret = cmd->do_func(argc, argv);
-    if (ret < 0)
-    {
-        fprintf(stderr, ESC_COLOR_ERROR"error: %d\n"ESC_COLOR_DEFAULT, ret);
-    }
-    
-}
-
-static const char * find_exec_path(const char * filename)
-{
-    static char path[255];
-
-    int fd = open(filename, 0);
-    if (fd < 0) {
-        sprintf(path, "%s.elf", filename);
-        fd = open(path, 0);
-        if (fd < 0) {
-            return (const char * )0;
-        }
-    }
-
-    close(fd);
-    return path;
-}
-
-static void run_exec_file(const char * path, int argc, char ** argv)
-{
-    int pid = fork();
-        if (pid < 0)
-        {
-            fprintf(stderr, "fork failed %s", path);
-        }
-        else if (pid == 0)
-        {   
-            int err = execve(path, argv, (char * const *)0);
-            if (err < 0)
-            {
-                fprintf(stderr, "exec failed %s", path);
-            }
-            exit(-1);
-        }
-        else
-        {
-            int status;
-            //wait函数等待子进程的退出
-            int pid = wait(&status);
-            fprintf(stderr, "cmd %s result = %d, pid = %d\n", path, status, pid);
-        }
-}
-
-void hang(int argc, char ** argv)
+void hang()
 {
     for(;;)
     {
         show_prompt();
         //fgets 从第三个参数指定的流中读取最多第二个参数大小的字符到第一个参数指定的容器地址中。
         char * str = fgets(cli.curr_input, CLI_INPUT_SIZE, stdin);
-        if (!str)
-        {
-            continue;
-        }
-        //strchr 用于查找字符串中的一个字符，并返回该字符在字符串中第一次出现的位置
-        char * cr = strchr(cli.curr_input, '\n');
-        if (cr) *cr = '\0';
-        cr = strchr(cli.curr_input, '\r');
-        if (cr) *cr = '\0';
+
+        if (!str) continue;
 
         int argc = 0;
         char * argv[CLI_MAX_ARG_COUNT];
 
-        //strtok 分解字符串为一组字符串。
-        const char * space = " ";
-        char * token = strtok(cli.curr_input, space);
-        while (token && (argc <= CLI_MAX_ARG_COUNT))
+        if (parse_arg(&argc, argv) != 0)
         {
-            argv[argc++] = token;
-            token = strtok(NULL, space);
+            exec(argc, argv);
         }
-        if (argc == 0)
-        {
-            continue;
-        }
-        
-        const cli_cmd_t * cmd = find_builtin(argv[0]);
-        if (cmd)
-        {
-            run_builtin(cmd, argc, argv);
-            continue;
-        }
-
-        const char * path = find_exec_path(argv[0]);
-        if (path)
-        {
-            //磁盘加载
-            run_exec_file(path, argc, argv);
-            continue;
-        }
-
-        fprintf(stderr, ESC_COLOR_ERROR"%s: command not found\n"ESC_COLOR_DEFAULT, cli.curr_input);
     }
 }
 
@@ -219,18 +140,8 @@ int main(int argc, char ** argv)
     int fd = open(argv[0], O_RDWR); //stdin
     dup(fd);                   //stdout
     dup(fd);                   //stderr
+    
     cli_init();
-    hang(argc, argv);
-}
 
-int do_help(int argc, char **argv)
-{
-    const cli_cmd_t * start = cli.cmd_start;
-    while (start < cli.cmd_end)
-    {
-        printf("%s %s\n", start->name, start->usage);
-        *start++;
-    }
- 
-    return 0;
+    hang();
 }
