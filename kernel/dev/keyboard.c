@@ -59,6 +59,19 @@ static const key_map_t map_table[256] = {
         [0x34] = {'.', '>'},
         [0x35] = {'/', '?'},
         [0x39] = {' ', ' '},
+        [0x47] = {'7', INV},  // pad 7 - Home
+        [0x48] = {'8', INV},  // pad 8 - Up
+        [0x49] = {'9', INV},  // pad 9 - PageUp
+        [0x4A] = {'-', '-'},  // pad -
+        [0x4B] = {'4', INV},  // pad 4 - Left
+        [0x4C] = {'5', INV},  // pad 5
+        [0x4D] = {'6', INV},  // pad 6 - Right
+        [0x4E] = {'+', '+'},  // pad +
+        [0x4F] = {'1', INV},  // pad 1 - End
+        [0x50] = {'2', INV},  // pad 2 - Down
+        [0x51] = {'3', INV},  // pad 3 - PageDown
+        [0x52] = {'0', INV},  // pad 0 - Insert
+        [0x53] = {'.', 0x7F}, // pad . - Delete
 };
 
 void keyboard_init (void)

@@ -1,7 +1,6 @@
 #include "main.h"
 #include "cmd/cmd.h"
 #include "applib/lib_syscall.h"
-#include "cmd/history.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -89,8 +88,6 @@ static void cli_init(void)
     cli.cmd_start = cmd_list;
     cli.cmd_end = cmd_list + size;
     cli.size = size;
-
-    history_list_init();
 }
 
 static void show_prompt(void)

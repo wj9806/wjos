@@ -178,6 +178,7 @@ int console_init(int idx)
     console->old_cursor_col = console->cursor_col;
     console->write_state = CONSOLE_WRITE_NORMAL;
     mutex_init(&console->mutex);
+    history_init(&console->history);
     return 0;
 }
 

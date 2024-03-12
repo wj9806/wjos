@@ -3,6 +3,8 @@
 
 #include "comm/types.h"
 
+#define INV                     0 // 不可见字符
+
 #define KBD_PORT_DATA           0x60
 #define KBD_PORT_STAT           0x64
 #define KBD_PORT_CMD            0x64
