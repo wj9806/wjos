@@ -34,6 +34,7 @@
 #define SYS_GMTIME_R                121
 
 #define SYS_POWER                   200
+#define SYS_SAVE_HISTORY            201
 
 #define SYSCALL_PARAM_COUNT         5
 

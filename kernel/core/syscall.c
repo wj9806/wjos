@@ -5,6 +5,7 @@
 #include "fs/fs.h"
 #include "core/memory.h"
 #include "dev/time.h"
+#include "base/history.h"
 
 typedef int (*syscall_handler_t)(uint32_t arg0, uint32_t arg1, uint32_t arg2, uint32_t arg03);
 
@@ -43,6 +44,7 @@ static const syscall_handler_t  sys_table[] = {
 	[SYS_GETTIMEOFDAY] =  (syscall_handler_t) sys_gettimeofday,
 	[SYS_GMTIME_R] 	   =  (syscall_handler_t) sys_gmtime_r,
 	[SYS_POWER]		   =  (syscall_handler_t) sys_power,
+	[SYS_SAVE_HISTORY] =  (syscall_handler_t) sys_save_history,
 };
 
 /**

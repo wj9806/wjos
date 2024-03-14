@@ -74,12 +74,37 @@ static void run_exec_file(const char * path, int argc, char ** argv)
     }
 }
 
+void pre_exec(int argc, char ** argv)
+{
+    char arg_string[CLI_INPUT_SIZE] = ""; 
+    int i;
+
+    
+    for (i = 0; i < argc; i++) {
+        strcat(arg_string, argv[i]); 
+        if (i < argc - 1)
+        {
+            strcat(arg_string, " ");   
+        }
+    }
+
+    //保存历史命令
+    save_history(cli.console_num, arg_string);
+}
+
+void post_exec(int argc, char ** argv)
+{
+
+}
+
 void exec(int argc, char ** argv)
 {
     const cli_cmd_t * cmd = find_builtin(argv[0]);
     if (cmd)
     {
+        pre_exec(argc, argv);
         run_builtin(cmd, argc, argv);
+        post_exec(argc, argv);
         return;
     }
 
@@ -87,7 +112,9 @@ void exec(int argc, char ** argv)
     if (path)
     {
         //磁盘加载
+        pre_exec(argc, argv);
         run_exec_file(path, argc, argv);
+        post_exec(argc, argv);
         return;
     }
 

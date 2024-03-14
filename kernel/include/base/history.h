@@ -34,5 +34,6 @@ history_command_t * next_cmd(history_t * history);
 
 void add(history_t * history, char * cmd);
 
+void sys_save_history(int console_num, int cmd);
 
 #endif

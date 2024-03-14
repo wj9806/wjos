@@ -5,7 +5,7 @@ int first_task_main(void)
 {
     print_msg("\x1b[37m" "welcome to wjos!" "\x1b[39m", 0);
     
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < TTY_NR; i++)
     {
         int pid = fork();
         if (pid < 0)

@@ -79,7 +79,7 @@ const cli_cmd_t cmd_list[] = {
     }
 };
 
-static void cli_init(void)
+static void cli_init(int argc, char ** argv)
 {
     cli.prompt = prompt;
     memset(cli.curr_input, 0, CLI_INPUT_SIZE);
@@ -88,6 +88,11 @@ static void cli_init(void)
     cli.cmd_start = cmd_list;
     cli.cmd_end = cmd_list + size;
     cli.size = size;
+
+    int console_num;
+    //sscanf 获取tty后面数字部分
+    sscanf(argv[0], "/dev/tty%d", &console_num);
+    cli.console_num = console_num;
 }
 
 static void show_prompt(void)
@@ -141,7 +146,7 @@ int main(int argc, char ** argv)
     dup(fd);                   //stdout
     dup(fd);                   //stderr
     
-    cli_init();
+    cli_init(argc, argv);
 
     hang();
 }

@@ -92,4 +92,6 @@ struct tm *gmtime_r(const time_t *timep, struct tm *result);
 
 int power(int status);
 
+int save_history(int console_num, const char * cmd);
+
 #endif

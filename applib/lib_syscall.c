@@ -278,3 +278,13 @@ int power(int status)
     
     return sys_call(&args);
 }
+
+int save_history(int console_num, const char * cmd)
+{
+    syscall_args_t args;
+    args.id = SYS_SAVE_HISTORY;
+    args.arg0 = (int) console_num;
+    args.arg1 = (int) cmd;
+    
+    return sys_call(&args);
+}

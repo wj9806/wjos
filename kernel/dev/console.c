@@ -3,7 +3,7 @@
 #include "tools/klib.h"
 #include "cpu/irq.h"
 
-static console_t console_buf[CONSOLE_NR];
+console_t console_buf[CONSOLE_NR];
 static int curr_console_idx = 0;
 
 //读取当前光标的位置

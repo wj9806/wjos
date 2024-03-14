@@ -1,5 +1,8 @@
 #include "base/history.h"
 #include "dev/time.h"
+#include "dev/console.h"
+
+extern console_t console_buf[];
 
 void history_init(history_t * history)
 {
@@ -64,4 +67,10 @@ void add(history_t * history, char * cmd)
         list_remove_first(&history->history_list);
     }
     list_insert_last(&history->history_list, &node);
+}
+
+void sys_save_history(int console_num, int cmd)
+{
+    console_t console = console_buf[console_num];
+    add(&console.history, (char *) cmd);
 }
