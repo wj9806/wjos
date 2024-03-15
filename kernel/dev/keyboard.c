@@ -98,10 +98,6 @@ static inline char get_key(uint8_t key_code) {
 static void do_fx_key(int key)
 {
     int index = key - KEY_F1;
-    // if (keyboard_state.lctrl_press || keyboard_state.rctrl_press)
-    // {
-    //     tty_select(index);
-    // }
     tty_select(index);
 }
 

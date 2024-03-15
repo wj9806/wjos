@@ -215,11 +215,51 @@ int tty_control(device_t * dev, int cmd, int arg0, int arg1)
     return 0;
 }
 
+//上一个历史命令
+history_command_t * pre_cmd(console_t * console)
+{
+    int curr_his_idx = console->curr_his_idx--;
+    if (console->curr_his_idx < 0)
+    {
+        console->curr_his_idx = MAX_SAVE_CMDS_NR - 1;
+    }
+    
+    return &console->his_cmds[curr_his_idx];
+}
+
+//下一个历史命令
+history_command_t * next_cmd(console_t * console)
+{
+    int curr_his_idx = console->curr_his_idx++;
+    if (console->curr_his_idx == MAX_SAVE_CMDS_NR)
+    {
+        console->curr_his_idx = 0;
+    }
+    return &console->his_cmds[curr_his_idx];
+}
+
 void tty_handle_key(int key)
 {
-    tty_t * tty = tty_devs + curr_tty;
-    if (get_console(curr_tty)->console_mode == CMD_MODE)
+    console_t * console = get_console(curr_tty);
+    if (console->console_mode == CMD_MODE)
     {
+        //todo 判断空指针
+        //up down处理
+        history_command_t * his_cmd = pre_cmd(console);
+        char ch;
+
+        for (int i = 0; i < CLI_INPUT_SIZE; i++)
+        {
+            ch = his_cmd->cmd[i];
+            if (ch != '\0')
+            {
+                tty_in(ch);
+            }
+            else
+            {
+                break;
+            }
+        }
         
     }
     

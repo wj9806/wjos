@@ -1,76 +1,36 @@
 #include "base/history.h"
 #include "dev/time.h"
 #include "dev/console.h"
+#include "tools/klib.h"
 
-extern console_t console_buf[];
-
-void history_init(history_t * history)
+void history_command_init(history_command_t * his_cmd)
 {
-    list_init(&history->history_list);
-    node_init(history->curr);
-    //可从.history中加载
+    his_cmd->time = 0;
+    kernel_memset(his_cmd->cmd, '\0', CLI_INPUT_SIZE);
 }
 
-//上一个历史命令
-history_command_t * pre_cmd(history_t * history)
+void add(console_t * console, char * cmd)
 {
-    if (history != (history_t *)0)
-    {
-        node_t * curr = history->curr;
-        if (curr == NULL)
-        {
-            return NULL;
-        }
-        if (curr->pre != NULL)
-        {
-            curr = curr->pre;
-            return list_node_parent(curr, history_command_t, cmd_node);
-        }
-
-    }
-    return NULL;
-}
-
-//下一个历史命令
-history_command_t * next_cmd(history_t * history)
-{
-    if (history != (history_t *)0)
-    {
-        node_t * curr = history->curr;
-        if (curr == NULL)
-        {
-            return NULL;
-        }
-        if (curr->next != NULL)
-        {
-            curr = curr->next;
-            return list_node_parent(curr, history_command_t, cmd_node);
-        }
-    }
-    return NULL;
-}
-
-void add(history_t * history, char * cmd)
-{
+    //todo 判断是否够与上一个命令相同，如果一样则只更新时间
+    //需要判断空指针
     time_t timep = sys_time();
 
-    node_t node;
-    node_init(&node);
-
-    history_command_t history_command;
-    history_command.cmd = cmd;
-    history_command.time = timep;
-    history_command.cmd_node = node;
-
-    if (history->history_list.count == MAX_SAVE_CMDS_NR)
+    int curr_his_idx = ++console->his_idx;
+    if(curr_his_idx == MAX_SAVE_CMDS_NR)
     {
-        list_remove_first(&history->history_list);
+       console->his_idx = curr_his_idx = 0;
     }
-    list_insert_last(&history->history_list, &node);
+    history_command_t * his_cmd = &console->his_cmds[curr_his_idx];
+    history_command_init(his_cmd);
+
+    
+    his_cmd->time = timep;
+
+    kernel_memcpy(his_cmd->cmd, cmd, kernel_strlen(cmd));
 }
 
 void sys_save_history(int console_num, int cmd)
 {
-    console_t console = console_buf[console_num];
-    add(&console.history, (char *) cmd);
+    console_t * console = get_console(console_num);
+    add(console, (char *) cmd);
 }

@@ -3,7 +3,7 @@
 #include "tools/klib.h"
 #include "cpu/irq.h"
 
-console_t console_buf[CONSOLE_NR];
+static console_t console_buf[CONSOLE_NR];
 static int curr_console_idx = 0;
 
 //读取当前光标的位置
@@ -179,7 +179,14 @@ int console_init(int idx)
     console->write_state = CONSOLE_WRITE_NORMAL;
     console->console_mode = CMD_MODE;
     mutex_init(&console->mutex);
-    history_init(&console->history);
+
+    //todo 可从文件加载历史命令
+    console->his_idx = console->curr_his_idx = MAX_SAVE_CMDS_NR -1;
+    for (int i = 0; i < MAX_SAVE_CMDS_NR; i++)
+    {
+        history_command_init(&console->his_cmds[i]);
+    }
+    
     return 0;
 }
 
@@ -435,5 +442,5 @@ int console_select(int idx)
 
 console_t * get_console(int idx)
 {
-    return console_buf + idx;
+    return &console_buf[idx];
 }
