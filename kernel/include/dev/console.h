@@ -74,6 +74,11 @@ typedef struct _console_t
 
     mutex_t mutex;
     history_t history;
+
+    enum {
+        CMD_MODE,  //命令行模式
+        EDITOR_MODE,  //编辑器模式
+    } console_mode; //控制台模式
 } console_t;
 
 int console_init(int idx);
@@ -83,4 +88,6 @@ int console_write(tty_t * tty);
 int console_close(int console);
 
 int console_select(int idx);
+
+console_t * get_console(int idx);
 #endif

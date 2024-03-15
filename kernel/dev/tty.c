@@ -215,6 +215,16 @@ int tty_control(device_t * dev, int cmd, int arg0, int arg1)
     return 0;
 }
 
+void tty_handle_key(int key)
+{
+    tty_t * tty = tty_devs + curr_tty;
+    if (get_console(curr_tty)->console_mode == CMD_MODE)
+    {
+        
+    }
+    
+}
+
 void tty_close(device_t * dev)
 {
     

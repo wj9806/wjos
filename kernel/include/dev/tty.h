@@ -58,6 +58,8 @@ int tty_fifo_get(tty_fifo_t * fifo, char *c);
 
 void tty_in(char ch);
 
+void tty_handle_key(int key);
+
 void tty_select(int tty);
 
 #endif

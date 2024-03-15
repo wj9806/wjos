@@ -177,6 +177,7 @@ int console_init(int idx)
     console->old_cursor_row = console->cursor_row;
     console->old_cursor_col = console->cursor_col;
     console->write_state = CONSOLE_WRITE_NORMAL;
+    console->console_mode = CMD_MODE;
     mutex_init(&console->mutex);
     history_init(&console->history);
     return 0;
@@ -430,4 +431,9 @@ int console_select(int idx)
     update_cursor_pos(console);
     //char num = idx + '0';
     //show_char(console, num);
+}
+
+console_t * get_console(int idx)
+{
+    return console_buf + idx;
 }

@@ -20,6 +20,12 @@
 #define KEY_ALT                 0x38
 #define KEY_CTRL                0x1D
 
+#define KEY_UP                  0x48
+#define KEY_LEFT                0x4B
+#define KEY_RIGHT               0x4D
+#define KEY_DOWN                0x50
+
+
 #define KEY_F1			        (0x3B)
 #define KEY_F2			        (0x3C)
 #define KEY_F3			        (0x3D)

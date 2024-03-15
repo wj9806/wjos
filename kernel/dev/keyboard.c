@@ -190,6 +190,10 @@ static void do_e0_key(uint8_t raw_code)
         case KEY_ALT:
             keyboard_state.ralt_press = is_make;  // 仅设置标志位
             break;
+        case KEY_UP:
+        case KEY_DOWN:
+            tty_handle_key(key);
+            break;    
         default:
             break;
     }
