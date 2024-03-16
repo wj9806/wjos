@@ -141,14 +141,16 @@ static int move_backword(console_t * console, int n)
     return status;
 }
 
-static void erase_backword(console_t * console)
+void erase_backword(console_t * console, int n)
 {
-    if (move_backword(console, 1) == 0)
+    for (int i = 0; i < n; i++)
     {
-        show_char(console, ' ');
-        move_backword(console, 1);
+        if (move_backword(console, 1) == 0)
+        {
+            show_char(console, ' ');
+            move_backword(console, 1);
+        }
     }
-    
 }
 
 int console_init(int idx)
@@ -201,7 +203,7 @@ static void write_normal(console_t * c, char ch)
             break;
         case 0x7f:
             //往回删除一个字符
-            erase_backword(c);
+            erase_backword(c, 1);
             break;
         case '\a':
             start_beep();
@@ -443,4 +445,66 @@ int console_select(int idx)
 console_t * get_console(int idx)
 {
     return &console_buf[idx];
+}
+
+//上一个历史命令
+history_command_t * pre_cmd(console_t * console)
+{
+    int curr_his_idx;
+    if (console->curr_his_idx == -1)
+    {
+        console->curr_his_idx = console->his_idx;
+    }
+    else
+    {
+        curr_his_idx = --console->curr_his_idx;
+    }
+    
+    if (console->curr_his_idx < 0)
+    {
+        curr_his_idx = console->curr_his_idx = MAX_SAVE_CMDS_NR - 1;
+    }
+    history_command_t * pre = &console->his_cmds[curr_his_idx];
+    //回退console->curr_his_idx
+    if (pre->cmd[0] == '\0')
+    {
+        console->curr_his_idx++;
+        if (console->curr_his_idx == MAX_SAVE_CMDS_NR)
+        {
+            console->curr_his_idx = 0;
+        }
+    }
+    
+    return pre;
+}
+
+history_command_t * peek_pre_cmd(console_t * console)
+{
+    int curr_his_idx = console->his_idx -1;
+    if (curr_his_idx < 0)
+    {
+        curr_his_idx = MAX_SAVE_CMDS_NR - 1;
+    }
+    return &console->his_cmds[curr_his_idx];
+}
+
+//下一个历史命令
+history_command_t * next_cmd(console_t * console)
+{
+    int curr_his_idx = ++console->curr_his_idx;
+    if (console->curr_his_idx == MAX_SAVE_CMDS_NR)
+    {
+        curr_his_idx = console->curr_his_idx = 0;
+    }
+    history_command_t * next = &console->his_cmds[curr_his_idx];
+    //回退console->curr_his_idx
+    if (next->cmd[0] == '\0')
+    {
+        console->curr_his_idx--;
+        if (console->curr_his_idx == 0)
+        {
+            console->curr_his_idx = MAX_SAVE_CMDS_NR -1;
+        }
+    }
+    return next;
 }

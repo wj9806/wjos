@@ -21,6 +21,8 @@ void kernel_strcpy(char * dest, const char * src);
 
 void kernel_strncpy(char * dest, const char * src, int size);
 
+int all_strcmp(const char *s1, const char *s2);
+
 int kernel_strcmp(const char * s1, const char * s2, int size);
 
 int kernel_strlen(const char * str);

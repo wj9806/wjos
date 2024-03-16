@@ -65,6 +65,19 @@ void kernel_strncpy(char * dest, const char * src, int size)
     }
 }
 
+//等于0说明相等
+int all_strcmp(const char *s1, const char *s2) 
+{
+    while (*s1 && *s2 && *s1 == *s2) 
+    {
+        s1++;
+        s2++;
+    }
+
+    // 返回差值
+    return *s1 - *s2;
+}
+
 int kernel_strcmp(const char * s1, const char * s2, int size)
 {
     if (!s1 || !s2) {

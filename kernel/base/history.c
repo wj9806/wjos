@@ -11,19 +11,27 @@ void history_command_init(history_command_t * his_cmd)
 
 void add(console_t * console, char * cmd)
 {
-    //todo 判断是否够与上一个命令相同，如果一样则只更新时间
-    //需要判断空指针
+    //判断是否够与上一个命令相同，如果一样则只更新时间
     time_t timep = sys_time();
+
+    history_command_t * pre = peek_pre_cmd(console);
+    
+    if (!all_strcmp(pre->cmd, cmd))
+    {
+        pre->time = timep;
+        return;
+    }
 
     int curr_his_idx = ++console->his_idx;
     if(curr_his_idx == MAX_SAVE_CMDS_NR)
     {
        console->his_idx = curr_his_idx = 0;
     }
+
+    console->curr_his_idx = -1;
     history_command_t * his_cmd = &console->his_cmds[curr_his_idx];
     history_command_init(his_cmd);
 
-    
     his_cmd->time = timep;
 
     kernel_memcpy(his_cmd->cmd, cmd, kernel_strlen(cmd));

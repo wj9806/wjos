@@ -93,4 +93,15 @@ int console_close(int console);
 int console_select(int idx);
 
 console_t * get_console(int idx);
+
+//上一个历史命令
+history_command_t * pre_cmd(console_t * console);
+
+//下一个历史命令
+history_command_t * next_cmd(console_t * console);
+
+//往回删除n个字符
+void erase_backword(console_t * console, int n);
+
+history_command_t * peek_pre_cmd(console_t * console);
 #endif
