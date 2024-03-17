@@ -143,13 +143,17 @@ static int move_backword(console_t * console, int n)
 
 void erase_backword(console_t * console, int n)
 {
-    for (int i = 0; i < n; i++)
+    if (n)
     {
-        if (move_backword(console, 1) == 0)
+        for (int i = 0; i < n; i++)
         {
-            show_char(console, ' ');
-            move_backword(console, 1);
+            if (move_backword(console, 1) == 0)
+            {
+                show_char(console, ' ');
+                move_backword(console, 1);
+            }
         }
+        console->input_len -= n;
     }
 }
 
@@ -180,6 +184,7 @@ int console_init(int idx)
     console->old_cursor_col = console->cursor_col;
     console->write_state = CONSOLE_WRITE_NORMAL;
     console->console_mode = CMD_MODE;
+    console->input_len = 0;
     mutex_init(&console->mutex);
 
     //todo 可从文件加载历史命令

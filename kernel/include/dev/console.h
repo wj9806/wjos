@@ -76,6 +76,7 @@ typedef struct _console_t
 
     int his_idx;        //能移动的历史命令索引
     int curr_his_idx;   //当前最新历史命令索引
+    int input_len;      //输入的长度
     history_command_t his_cmds[MAX_SAVE_CMDS_NR];
 
     enum {

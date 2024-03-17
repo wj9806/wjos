@@ -16,7 +16,7 @@ void add(console_t * console, char * cmd)
 
     history_command_t * pre = peek_pre_cmd(console);
     
-    if (!all_strcmp(pre->cmd, cmd))
+    if (!kernel_all_strcmp(pre->cmd, cmd))
     {
         pre->time = timep;
         return;

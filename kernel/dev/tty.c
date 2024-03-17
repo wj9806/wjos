@@ -152,8 +152,11 @@ int tty_read(device_t * dev, int addr, char * buf, int size)
 
         char ch;
         tty_fifo_get(&tty->ififo, &ch);
+        
+        console_t * curr_console = get_console(tty->console_idx);
         switch (ch)
         {
+            //退格
             case 0x7f:
                 if (len == 0)
                 {
@@ -161,7 +164,9 @@ int tty_read(device_t * dev, int addr, char * buf, int size)
                 }
                 len--;
                 pbuf--;
+                curr_console->input_len--;
                 break;
+                //换行
             case '\n':
                 if ((tty->iflags) && (len < size - 1))
                 {
@@ -170,10 +175,12 @@ int tty_read(device_t * dev, int addr, char * buf, int size)
                 }
                 *pbuf++='\n';
                 len++;
+                curr_console->input_len = 0;
                 break;
             default:
                 *pbuf++=ch;
                 len++;
+                curr_console->input_len++;
                 break;
         }
         if (tty->iflags & TTY_IECHO)
@@ -217,7 +224,8 @@ int tty_control(device_t * dev, int cmd, int arg0, int arg1)
 
 void show_his_cmd(console_t * console, history_command_t * his_cmd)
 {
-    //todo 清除已经输入的字符
+    erase_backword(console, console->input_len);
+
     char ch;
     for (int i = 0; i < CLI_INPUT_SIZE; i++)
     {
