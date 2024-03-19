@@ -94,4 +94,5 @@ int power(int status);
 
 int save_history(int console_num, const char * cmd);
 
+void get_history(int console_num, char ** arr);
 #endif

@@ -35,6 +35,7 @@
 
 #define SYS_POWER                   200
 #define SYS_SAVE_HISTORY            201
+#define SYS_GET_HISTORY             202
 
 #define SYSCALL_PARAM_COUNT         5
 

@@ -288,3 +288,13 @@ int save_history(int console_num, const char * cmd)
     
     return sys_call(&args);
 }
+
+void get_history(int console_num, char ** arr)
+{
+    syscall_args_t args;
+    args.id = SYS_GET_HISTORY;
+    args.arg0 = (int) console_num;
+    args.arg1 = (int) arr;
+    
+    sys_call(&args);
+}

@@ -2,6 +2,7 @@
 #define __MAIN_H__
 
 #define CLI_INPUT_SIZE              128
+#define MAX_SAVE_CMDS_NR            100
 #define CLI_MAX_ARG_COUNT           10
 
 //发送ESC转义序列完成清屏
@@ -31,5 +32,6 @@ typedef struct _cli_t
     int console_num;
 } cli_t;
 
+cli_t * curr_cli();
 
 #endif

@@ -76,6 +76,11 @@ const cli_cmd_t cmd_list[] = {
         .name = "touch",
         .usage = "touch [file]",
         .do_func = do_touch
+    },
+    {
+        .name = "history",
+        .usage = "show history command",
+        .do_func = do_history
     }
 };
 
@@ -149,4 +154,9 @@ int main(int argc, char ** argv)
     cli_init(argc, argv);
 
     hang();
+}
+
+cli_t * curr_cli()
+{
+    return &cli;
 }

@@ -28,4 +28,5 @@ int do_reboot(int argc, char ** argv);
 
 int do_touch(int argc, char ** argv);
 
+int do_history(int argc, char ** argv);
 #endif
